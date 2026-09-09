@@ -131,10 +131,31 @@ class StaySelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+    final ColorScheme colors = theme.colorScheme;
+
+    // A field-like label rather than the theme's uppercase action stamp: these
+    // two buttons stand in for inputs, and setting them in the button voice
+    // would make the dates shout louder than the search.
+    final ButtonStyle fieldStyle = OutlinedButton.styleFrom(
+      minimumSize: const Size(64, 50),
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      textStyle: theme.textTheme.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w500,
+      ),
+      foregroundColor: colors.onSurface,
+    );
+
+    // Full width against a hairline rather than a floating rounded card: the
+    // results below run edge to edge, and a card here would leave the search
+    // sitting on a different grid from everything it produces.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(bottom: BorderSide(color: colors.outlineVariant)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
         child: Column(
           children: <Widget>[
             // DropdownButton inside an InputDecorator rather than
@@ -143,13 +164,17 @@ class StaySelector extends StatelessWidget {
             // either spelling pins the project to one side of that change. This
             // composition has been stable for years and looks identical.
             InputDecorator(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Destination',
-                prefixIcon: Icon(Icons.place_outlined),
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
+                prefixIcon: const Icon(Icons.place_outlined, size: 19),
+                labelStyle: theme.textTheme.bodyMedium,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(2),
+                  borderSide: BorderSide(color: colors.outlineVariant),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8,
+                  vertical: 10,
                 ),
               ),
               child: DropdownButtonHideUnderline(
@@ -175,13 +200,14 @@ class StaySelector extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Row(
               children: <Widget>[
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _pickDates(context),
-                    icon: const Icon(Icons.calendar_month_outlined, size: 18),
+                    style: fieldStyle,
+                    icon: const Icon(Icons.calendar_month_outlined, size: 17),
                     label: Text(
                       '${formatShortDate(query.stay.checkIn)} – '
                       '${formatShortDate(query.stay.checkOut)}',
@@ -193,7 +219,8 @@ class StaySelector extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _pickGuests(context),
-                    icon: const Icon(Icons.person_outline, size: 18),
+                    style: fieldStyle,
+                    icon: const Icon(Icons.person_outline, size: 17),
                     label: Text(
                       query.occupancy.label,
                       overflow: TextOverflow.ellipsis,
@@ -202,15 +229,14 @@ class StaySelector extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
+              child: FilledButton(
                 onPressed: onSearch,
-                icon: const Icon(Icons.search),
-                label: Text(
-                  '${query.stay.nights} night'
-                  '${query.stay.nights == 1 ? '' : 's'} · Search',
+                child: Text(
+                  'SEARCH · ${query.stay.nights} NIGHT'
+                  '${query.stay.nights == 1 ? '' : 'S'}',
                 ),
               ),
             ),

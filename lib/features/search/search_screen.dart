@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/router.dart';
+import '../../app/theme.dart';
 import '../../core/error/failure.dart';
 import '../../data/hotel_repository.dart';
 import '../../domain/cart.dart';
@@ -9,6 +10,7 @@ import '../../domain/rate.dart';
 import '../../domain/search.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_states.dart';
+import '../../shared/widgets/section_heading.dart';
 import '../account/session_controller.dart';
 import '../cart/cart_controller.dart';
 import 'search_controller.dart';
@@ -52,7 +54,24 @@ class SearchScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LuxeStays'),
+        title: Text(
+          // Set as a letterspaced serif wordmark rather than as an app-bar
+          // title: the brand is the only thing in the chrome, so it should
+          // read as a masthead.
+          'LUXESTAYS',
+          style: AppTheme.serif(size: 17, letterSpacing: 4.2),
+        ),
+        // A hairline instead of an elevation shadow. The masthead is separated
+        // from the page by a rule, the same device used for every other
+        // section break in the app.
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
         actions: <Widget>[
           IconButton(
             tooltip: 'Refine',
@@ -142,13 +161,10 @@ class SearchScreen extends ConsumerWidget {
                 }
                 return <Widget>[
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                      child: Text(
-                        '${results.length} propert'
-                        '${results.length == 1 ? 'y' : 'ies'} available',
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
+                    child: SectionHeading(
+                      label: '${results.length} PROPERT'
+                          '${results.length == 1 ? 'Y' : 'IES'} AVAILABLE',
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
                     ),
                   ),
                   SliverList.builder(

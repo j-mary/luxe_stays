@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme.dart';
 import '../../../core/utils/money.dart';
 import '../../../data/hotel_repository.dart';
 import '../../../domain/media.dart';
@@ -13,9 +14,12 @@ import '../../../shared/widgets/media_image.dart';
 /// of the three can be missing and the card still renders — which is the
 /// visible consequence of the rule that content is never load-bearing.
 ///
-/// The photograph is the only saturated thing on the card. Everything else is
-/// type on a neutral surface with a hairline border, so a list of twenty reads
-/// as a catalogue rather than as twenty competing tiles.
+/// Laid out as a page in a catalogue rather than as a tile in a grid: the
+/// photograph runs the full width with no corner radius, the type sits on the
+/// paper beneath it, and a hairline rule separates one property from the next.
+/// A bordered rounded card would put a frame around every result and turn a
+/// list of twenty into twenty competing objects; a rule turns it into a
+/// sequence.
 class HotelCard extends StatelessWidget {
   const HotelCard({
     required this.result,
@@ -36,98 +40,79 @@ class HotelCard extends StatelessWidget {
     final bool hasMemberRate = result.bestMemberOffer != null;
     final MediaAsset? hero = result.hotel.heroImage;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.outlineVariant),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Material(
+      color: colors.surface,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Stack(
               children: <Widget>[
-                Stack(
-                  children: <Widget>[
-                    AspectRatio(
-                      aspectRatio: 3 / 2,
-                      child: MediaImage(
-                        asset: hero,
-                        transform: MediaTransform.card,
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
-                    if (hasMemberRate)
-                      const Positioned(
-                        top: 12,
-                        left: 12,
-                        child: _MemberMark(),
-                      ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              result.hotel.name,
-                              style: theme.textTheme.titleMedium,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 3),
-                            child: _Stars(count: result.hotel.starRating),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        result.hotel.locationLabel.toUpperCase(),
-                        style: theme.textTheme.labelSmall,
-                      ),
-                      if (result.hotel.editorial != null) ...<Widget>[
-                        const SizedBox(height: 10),
-                        Text(
-                          result.hotel.editorial!.headline,
-                          style: theme.textTheme.bodySmall,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      const SizedBox(height: 14),
-                      Divider(height: 1, color: colors.outlineVariant),
-                      const SizedBox(height: 14),
-                      if (leadIn == null)
-                        Text(
-                          'No availability for these dates',
-                          style: theme.textTheme.bodySmall,
-                        )
-                      else
-                        _PriceRow(
-                          offer: leadIn,
-                          onQuickAdd: onQuickAdd == null
-                              ? null
-                              : () => onQuickAdd!(leadIn),
-                        ),
-                    ],
+                AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: MediaImage(
+                    asset: hero,
+                    transform: MediaTransform.card,
+                    borderRadius: BorderRadius.zero,
                   ),
                 ),
+                if (hasMemberRate)
+                  const Positioned(top: 0, left: 0, child: _MemberMark()),
               ],
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          result.hotel.locationLabel.toUpperCase(),
+                          style: theme.textTheme.labelSmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      _Stars(count: result.hotel.starRating),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    result.hotel.name,
+                    style: theme.textTheme.titleLarge,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (result.hotel.editorial != null) ...<Widget>[
+                    const SizedBox(height: 9),
+                    Text(
+                      result.hotel.editorial!.headline,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  const SizedBox(height: 18),
+                  if (leadIn == null)
+                    Text(
+                      'No availability for these dates',
+                      style: theme.textTheme.bodySmall,
+                    )
+                  else
+                    _PriceRow(
+                      offer: leadIn,
+                      onQuickAdd:
+                          onQuickAdd == null ? null : () => onQuickAdd!(leadIn),
+                    ),
+                ],
+              ),
+            ),
+            Divider(height: 1, thickness: 1, color: colors.outlineVariant),
+          ],
         ),
       ),
     );
@@ -155,23 +140,26 @@ class _PriceRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text('FROM', style: theme.textTheme.labelSmall),
-              const SizedBox(height: 3),
+              const SizedBox(height: 4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: <Widget>[
+                  // The price is the one number set in the display serif: it is
+                  // what the guest came for, and it is the only place on the
+                  // card where a figure earns that much weight.
                   Text(
                     offer.averageNightly.format(),
-                    style: theme.textTheme.titleLarge?.copyWith(fontSize: 21),
+                    style: theme.textTheme.headlineSmall,
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 6),
                   Text(
                     'per night',
                     style: theme.textTheme.bodySmall?.copyWith(fontSize: 12.5),
                   ),
                 ],
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 3),
               Text(
                 '${offer.total.format()} total · $nights '
                 'night${nights == 1 ? '' : 's'}'
@@ -179,7 +167,7 @@ class _PriceRow extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(fontSize: 12.5),
               ),
               if (savings != null) ...<Widget>[
-                const SizedBox(height: 4),
+                const SizedBox(height: 5),
                 Text(
                   'Saves ${savings.format()} on the public rate',
                   style: theme.textTheme.labelMedium?.copyWith(
@@ -196,7 +184,7 @@ class _PriceRow extends StatelessWidget {
           OutlinedButton(
             onPressed: onQuickAdd,
             style: OutlinedButton.styleFrom(
-              minimumSize: const Size(76, 42),
+              minimumSize: const Size(84, 44),
               padding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             child: const Text('Add'),
@@ -207,37 +195,36 @@ class _PriceRow extends StatelessWidget {
   }
 }
 
-/// Membership is marked, not shouted: a light plate over the photograph rather
-/// than a saturated pill, so it reads as a detail of the property rather than
-/// as an advertisement laid on top of it.
+/// Membership is marked, not shouted: a small ink plate set flush into the
+/// corner of the photograph, gold type on near-black. Flush rather than inset
+/// because a floating pill reads as a sticker laid over the picture, while a
+/// corner that meets both edges reads as part of the plate the picture is
+/// printed on.
 class _MemberMark extends StatelessWidget {
   const _MemberMark();
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xF2FFFFFF),
-        borderRadius: BorderRadius.circular(4),
-      ),
+      decoration: BoxDecoration(color: AppTheme.plate.withAlpha(242)),
       child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: EdgeInsets.fromLTRB(12, 7, 13, 7),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Icon(
               Icons.workspace_premium_outlined,
               size: 12,
-              color: Color(0xFF9A7B4F),
+              color: AppTheme.plateGold,
             ),
-            SizedBox(width: 5),
+            SizedBox(width: 6),
             Text(
               'MEMBER RATE',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 9.5,
                 fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
-                color: Color(0xFF14201B),
+                letterSpacing: 1.4,
+                color: AppTheme.plateGold,
               ),
             ),
           ],
@@ -259,10 +246,10 @@ class _Stars extends StatelessWidget {
       children: List<Widget>.generate(
         count.clamp(0, 5).toInt(),
         (int _) => Padding(
-          padding: const EdgeInsets.only(left: 1),
+          padding: const EdgeInsets.only(left: 2),
           child: Icon(
             Icons.star_rounded,
-            size: 12,
+            size: 11,
             color: Theme.of(context).colorScheme.secondary,
           ),
         ),

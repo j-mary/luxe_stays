@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/router.dart';
 import '../../../integrations/cms/cms_models.dart';
 import '../../../shared/widgets/app_snack_bar.dart';
+import '../../../shared/widgets/section_heading.dart';
 import '../../home/offers_provider.dart';
 import '../search_controller.dart';
 
@@ -11,14 +12,14 @@ import '../search_controller.dart';
 ///
 /// The card has a fixed height because a horizontal list needs a bounded cross
 /// axis, so the content is budgeted rather than left to overflow: a single-line
-/// title, a two-line summary, and a footer pinned to the bottom. Earlier this
-/// laid out an unbounded column inside too little height, which clipped the
-/// summary mid-line — visually indistinguishable from a rendering bug.
+/// serif title, a two-line summary, and a footer pinned to the bottom. Earlier
+/// this laid out an unbounded column inside too little height, which clipped
+/// the summary mid-line — visually indistinguishable from a rendering bug.
 class OffersStrip extends ConsumerWidget {
   const OffersStrip({super.key});
 
-  static const double _cardHeight = 162;
-  static const double _cardWidth = 268;
+  static const double _cardHeight = 176;
+  static const double _cardWidth = 280;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,18 +31,10 @@ class OffersStrip extends ConsumerWidget {
         if (list.isEmpty) {
           return const SizedBox.shrink();
         }
-        final ThemeData theme = Theme.of(context);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Text(
-                'OFFERS',
-                style: theme.textTheme.labelSmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
-            ),
+            const SectionHeading(label: 'OFFERS'),
             SizedBox(
               height: _cardHeight,
               child: ListView.separated(
@@ -94,7 +87,7 @@ class _OfferCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(2),
           border: Border.all(color: colors.outlineVariant),
         ),
         child: Material(
@@ -102,7 +95,7 @@ class _OfferCard extends StatelessWidget {
           child: InkWell(
             onTap: onApply,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -111,10 +104,10 @@ class _OfferCard extends StatelessWidget {
                       if (offer.memberOnly) ...<Widget>[
                         Icon(
                           Icons.workspace_premium_outlined,
-                          size: 13,
+                          size: 12,
                           color: colors.secondary,
                         ),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 6),
                       ],
                       Text(
                         offer.memberOnly ? 'MEMBERS ONLY' : 'OPEN TO ALL',
@@ -126,20 +119,20 @@ class _OfferCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 11),
                   Text(
                     offer.title,
-                    style: theme.textTheme.titleSmall,
+                    style: theme.textTheme.titleMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 6),
                   // Budgeted to exactly two lines so the footer never gets
                   // pushed out of the fixed-height card.
                   Expanded(
                     child: Text(
                       offer.subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(height: 1.4),
+                      style: theme.textTheme.bodySmall?.copyWith(height: 1.45),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -188,7 +181,8 @@ class _OfferCard extends StatelessWidget {
 }
 
 /// The promotion code, set as a tag rather than as body copy — it is the one
-/// piece of the card a guest might read aloud or type somewhere else.
+/// piece of the card a guest might read aloud or type somewhere else. Gold,
+/// because applying it is the card's only action.
 class _CodeTag extends StatelessWidget {
   const _CodeTag({required this.code});
 
@@ -198,16 +192,16 @@ class _CodeTag extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: theme.colorScheme.secondary.withAlpha(110)),
       ),
       child: Text(
         code,
         style: theme.textTheme.labelSmall?.copyWith(
-          color: theme.colorScheme.onSurface,
-          letterSpacing: 0.6,
+          color: theme.colorScheme.primary,
+          letterSpacing: 1.1,
         ),
       ),
     );
