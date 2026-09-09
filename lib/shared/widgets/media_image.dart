@@ -108,8 +108,11 @@ class _Placeholder extends StatelessWidget {
       color: colors.surfaceContainerHighest,
       alignment: Alignment.center,
       child: failed
-          ? Icon(Icons.image_not_supported_outlined,
-              color: colors.onSurfaceVariant)
+          ? Icon(
+              Icons.landscape_outlined,
+              size: 22,
+              color: colors.outline,
+            )
           : null,
     );
   }

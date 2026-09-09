@@ -201,29 +201,31 @@ class _MemberBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colors = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 4),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.fromLTRB(13, 11, 14, 11),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
+          border: Border(
+            left: BorderSide(color: colors.secondary, width: 2),
+          ),
         ),
         child: Row(
           children: <Widget>[
             Icon(
-              Icons.workspace_premium_rounded,
-              size: 18,
-              color: theme.colorScheme.onPrimaryContainer,
+              Icons.workspace_premium_outlined,
+              size: 15,
+              color: colors.secondary,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 9),
             Expanded(
               child: Text(
-                '${session.tier.label} member · '
+                '${session.tier.label.toUpperCase()} · '
                 '${session.tier.memberRateDiscountPercent.toStringAsFixed(0)}% '
-                'member rates applied',
-                style: theme.textTheme.labelLarge
-                    ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+                'MEMBER RATES APPLIED',
+                style: theme.textTheme.labelSmall
+                    ?.copyWith(color: colors.onSurface),
               ),
             ),
           ],

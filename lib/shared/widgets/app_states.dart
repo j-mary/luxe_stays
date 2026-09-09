@@ -119,23 +119,65 @@ class EmptyView extends StatelessWidget {
   }
 }
 
-/// Shimmer-free skeleton. Deliberately plain: a skeleton that animates on a
-/// list of 20 cards is a measurable battery and jank cost on low-end devices,
-/// and buys very little.
+/// Shimmer-free skeleton, shaped like the card it stands in for.
+///
+/// Two deliberate choices. It does not animate: a shimmer across twenty cards
+/// is a measurable battery and jank cost on low-end devices and buys very
+/// little. And it matches the real card's geometry, so content does not jump
+/// when it arrives — a loading state that reflows on resolve reads as a
+/// glitch even when nothing is wrong.
 class SkeletonCard extends StatelessWidget {
-  const SkeletonCard({this.height = 240, super.key});
-
-  final double height;
+  const SkeletonCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+
+    Widget bar(double widthFactor, double height) => FractionallySizedBox(
+          alignment: Alignment.centerLeft,
+          widthFactor: widthFactor,
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: colors.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+        );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Container(
-        height: height,
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(16),
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: colors.outlineVariant),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(9)),
+              child: AspectRatio(
+                aspectRatio: 3 / 2,
+                child: ColoredBox(color: colors.surfaceContainerHighest),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  bar(0.55, 14),
+                  const SizedBox(height: 10),
+                  bar(0.3, 9),
+                  const SizedBox(height: 18),
+                  bar(0.4, 18),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

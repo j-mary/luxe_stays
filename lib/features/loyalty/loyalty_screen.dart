@@ -217,96 +217,149 @@ class _MemberView extends ConsumerWidget {
   }
 }
 
+/// The membership panel — the one place the app is allowed to be emphatic.
+///
+/// Rendered as a dark plate with brass accents rather than a tinted container,
+/// because tier status is the single moment in the product where a visual
+/// flourish is earned. Everywhere else the accent is spent on actions only.
 class _TierCard extends StatelessWidget {
   const _TierCard({required this.member, required this.rules});
 
   final LoyaltyMember member;
   final LoyaltyProgramRules rules;
 
+  static const Color _brass = Color(0xFFC9A876);
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool isLight = theme.brightness == Brightness.light;
+    final Color panel = isLight ? const Color(0xFF14201B) : const Color(0xFF20241F);
+    const Color onPanel = Color(0xFFF4F3EF);
+    final Color onPanelMuted = onPanel.withAlpha(150);
     final int? toNext = member.nightsToNextTier;
 
-    return Card(
-      color: theme.colorScheme.primaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              member.displayName,
-              style: theme.textTheme.titleLarge
-                  ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-            ),
-            Text(
-              '${member.tier.label} · ${member.membershipNumber}',
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-            ),
-            const SizedBox(height: 18),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: <Widget>[
-                Text(
-                  '${member.pointsBalance}',
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'points',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-                ),
-              ],
-            ),
-            Text(
-              'Worth about '
-              '${rules.pointsToMoney(member.pointsBalance, 'USD').format()}'
-              '${member.pendingPoints > 0 ? ' · ${member.pendingPoints} pending' : ''}',
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
-            ),
-            if (toNext != null && member.tier.next != null) ...<Widget>[
-              const SizedBox(height: 18),
-              LinearProgressIndicator(
-                value: member.progressToNextTier,
-                backgroundColor:
-                    theme.colorScheme.onPrimaryContainer.withAlpha(40),
-              ),
-              const SizedBox(height: 8),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+      decoration: BoxDecoration(
+        color: panel,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Icon(Icons.workspace_premium_outlined,
+                  size: 14, color: _brass),
+              const SizedBox(width: 7),
               Text(
-                toNext == 0
-                    ? '${member.tier.next!.label} unlocked on your next stay'
-                    : '$toNext more night${toNext == 1 ? '' : 's'} to '
-                        '${member.tier.next!.label}',
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+                '${member.tier.label.toUpperCase()} MEMBER',
+                style: theme.textTheme.labelSmall?.copyWith(color: _brass),
+              ),
+              const Spacer(),
+              Text(
+                member.membershipNumber,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: onPanelMuted,
+                  letterSpacing: 0.4,
+                ),
               ),
             ],
-            if (member.benefits.isNotEmpty) ...<Widget>[
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: member.benefits
-                    .map(
-                      (String benefit) => Chip(
-                        label: Text(benefit),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    )
-                    .toList(growable: false),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            member.displayName,
+            style: theme.textTheme.headlineSmall?.copyWith(color: onPanel),
+          ),
+          const SizedBox(height: 22),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: <Widget>[
+              Text(
+                _grouped(member.pointsBalance),
+                style: theme.textTheme.displaySmall?.copyWith(color: onPanel),
+              ),
+              const SizedBox(width: 8),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: Text(
+                  'POINTS',
+                  style: theme.textTheme.labelSmall?.copyWith(color: _brass),
+                ),
               ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Worth about '
+            '${rules.pointsToMoney(member.pointsBalance, 'USD').format()}'
+            '${member.pendingPoints > 0 ? ' · ${_grouped(member.pendingPoints)} pending' : ''}',
+            style: theme.textTheme.bodySmall?.copyWith(color: onPanelMuted),
+          ),
+          if (toNext != null && member.tier.next != null) ...<Widget>[
+            const SizedBox(height: 22),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: member.progressToNextTier,
+                minHeight: 3,
+                backgroundColor: onPanel.withAlpha(38),
+                valueColor: const AlwaysStoppedAnimation<Color>(_brass),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              toNext == 0
+                  ? '${member.tier.next!.label} unlocked on your next stay'
+                  : '$toNext more night${toNext == 1 ? '' : 's'} to '
+                      '${member.tier.next!.label}',
+              style: theme.textTheme.bodySmall?.copyWith(color: onPanelMuted),
+            ),
           ],
-        ),
+          if (member.benefits.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 7,
+              runSpacing: 7,
+              children: member.benefits
+                  .map(
+                    (String benefit) => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: onPanel.withAlpha(46)),
+                      ),
+                      child: Text(
+                        benefit,
+                        style: theme.textTheme.labelMedium
+                            ?.copyWith(color: onPanel, fontSize: 12),
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          ],
+        ],
       ),
     );
+  }
+
+  /// Thousands separators, because a six-figure balance is the whole point of
+  /// the panel and "132900" does not read as an achievement.
+  static String _grouped(int value) {
+    final String digits = value.abs().toString();
+    final StringBuffer out = StringBuffer(value < 0 ? '-' : '');
+    for (int i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) {
+        out.write(',');
+      }
+      out.write(digits[i]);
+    }
+    return out.toString();
   }
 }

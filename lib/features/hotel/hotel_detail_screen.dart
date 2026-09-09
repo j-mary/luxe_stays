@@ -180,25 +180,18 @@ class _SignatureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final ColorScheme colors = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(16, 4, 0, 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
+        border: Border(left: BorderSide(color: colors.secondary, width: 2)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(Icons.auto_awesome_outlined,
-              size: 18, color: theme.colorScheme.onSecondaryContainer),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSecondaryContainer),
-            ),
-          ),
+          Text('SIGNATURE EXPERIENCE', style: theme.textTheme.labelSmall),
+          const SizedBox(height: 6),
+          Text(text, style: theme.textTheme.bodyMedium),
         ],
       ),
     );
