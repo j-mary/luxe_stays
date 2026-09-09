@@ -123,9 +123,10 @@ class EmptyView extends StatelessWidget {
 ///
 /// Two deliberate choices. It does not animate: a shimmer across twenty cards
 /// is a measurable battery and jank cost on low-end devices and buys very
-/// little. And it matches the real card's geometry, so content does not jump
-/// when it arrives — a loading state that reflows on resolve reads as a
-/// glitch even when nothing is wrong.
+/// little. And it matches the real card's geometry — the same 4:3 full-bleed
+/// plate, the same insets, the same closing rule — so content does not jump
+/// when it arrives. A loading state that reflows on resolve reads as a glitch
+/// even when nothing is wrong.
 class SkeletonCard extends StatelessWidget {
   const SkeletonCard({super.key});
 
@@ -138,47 +139,36 @@ class SkeletonCard extends StatelessWidget {
           widthFactor: widthFactor,
           child: Container(
             height: height,
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(3),
-            ),
+            color: colors.surfaceContainerHighest,
           ),
         );
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.outlineVariant),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(9)),
-              child: AspectRatio(
-                aspectRatio: 3 / 2,
-                child: ColoredBox(color: colors.surfaceContainerHighest),
-              ),
+    return ColoredBox(
+      color: colors.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          AspectRatio(
+            aspectRatio: 4 / 3,
+            child: ColoredBox(color: colors.surfaceContainerHighest),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                bar(0.26, 9),
+                const SizedBox(height: 11),
+                bar(0.62, 18),
+                const SizedBox(height: 13),
+                bar(0.88, 11),
+                const SizedBox(height: 24),
+                bar(0.34, 22),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  bar(0.55, 14),
-                  const SizedBox(height: 10),
-                  bar(0.3, 9),
-                  const SizedBox(height: 18),
-                  bar(0.4, 18),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+          Divider(height: 1, thickness: 1, color: colors.outlineVariant),
+        ],
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
+import '../../app/theme.dart';
 import '../../domain/media.dart';
 import '../../integrations/leonardo/media_provider.dart';
 
@@ -43,7 +44,10 @@ class MediaImage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final MediaAsset? media = asset;
-    final BorderRadius radius = borderRadius ?? BorderRadius.circular(12);
+    // Near-square by default. Photography in this app is meant to read as a
+    // printed plate, and a 12px radius on every image is the single loudest
+    // signal that it is not.
+    final BorderRadius radius = borderRadius ?? BorderRadius.circular(2);
 
     if (media == null) {
       return ClipRRect(
@@ -127,17 +131,18 @@ class _ProvenanceBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: const Color(0x99000000),
-        borderRadius: BorderRadius.circular(4),
+        color: AppTheme.plate.withAlpha(214),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         child: Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
+            color: AppTheme.onPlate,
+            fontSize: 9.5,
             fontWeight: FontWeight.w600,
+            letterSpacing: 0.6,
           ),
         ),
       ),
