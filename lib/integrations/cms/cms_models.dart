@@ -60,16 +60,22 @@ class ContentfulResponse {
 
   /// Replaces every `Link` in [value] with the record it points at.
   ///
-  /// Depth-limited: a CMS graph can be cyclic (hotel → related offer → hotel),
-  /// and an unbounded resolver on a mobile main isolate is a hang.
+  /// [depth] counts **link hops, not structural nesting**, and the distinction
+  /// is the whole reason this method has a comment.
+  ///
+  /// Following links has to be bounded, because a CMS graph can be cyclic
+  /// (hotel → related offer → hotel) and an unbounded resolver on the main
+  /// isolate is a hang. Walking into a plain nested object cannot loop: the
+  /// payload came out of `jsonDecode`, so it is a tree. Charging both against
+  /// the same budget is therefore all cost and no benefit - and it silently
+  /// destroys data, because a resolved asset's own `fields.file.url` sits four
+  /// plain levels below the link that reached it. Counting those levels made
+  /// the budget run out exactly there, so the asset resolved, the object
+  /// looked right, and every image URL in it was null.
   Object? resolveLinks(Object? value, {int depth = 0, int maxDepth = 4}) {
-    if (depth > maxDepth) {
-      return null;
-    }
     if (value is List) {
       return value
-          .map((Object? e) =>
-              resolveLinks(e, depth: depth + 1, maxDepth: maxDepth))
+          .map((Object? e) => resolveLinks(e, depth: depth, maxDepth: maxDepth))
           .toList(growable: false);
     }
     if (value is! Map) {
@@ -78,6 +84,10 @@ class ContentfulResponse {
 
     final Object? sysRaw = value['sys'];
     if (sysRaw is Map && sysRaw['type'] == 'Link') {
+      if (depth >= maxDepth) {
+        // Link budget spent. Stop following rather than risk a cycle.
+        return null;
+      }
       final String linkType = (sysRaw['linkType'] as Object?)?.toString() ?? '';
       final String id = (sysRaw['id'] as Object?)?.toString() ?? '';
       final Map<String, Object?>? target = switch (linkType) {
@@ -91,13 +101,14 @@ class ContentfulResponse {
         // logging upstream) is better than crashing the screen.
         return null;
       }
+      // Only a hop across a link spends budget.
       return resolveLinks(target, depth: depth + 1, maxDepth: maxDepth);
     }
 
     return value.map(
       (Object? key, Object? child) => MapEntry<String, Object?>(
         key.toString(),
-        resolveLinks(child, depth: depth + 1, maxDepth: maxDepth),
+        resolveLinks(child, depth: depth, maxDepth: maxDepth),
       ),
     );
   }

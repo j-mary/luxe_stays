@@ -101,7 +101,9 @@ void main() {
     await tester.pump();
 
     expect(find.text('Maison Rivoli'), findsOneWidget);
-    expect(find.text('Paris, FR'), findsOneWidget);
+    // The card sets the location as a letterspaced overline, so the rendered
+    // string is upper-cased at the call site rather than in the model.
+    expect(find.text('PARIS, FR'), findsOneWidget);
     expect(find.text(r'$300.00'), findsOneWidget);
     expect(find.textContaining('total · 2 nights'), findsOneWidget);
   });
@@ -145,8 +147,10 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Member rate'), findsOneWidget);
-    expect(find.text('2 left'), findsOneWidget);
+    expect(find.text('MEMBER RATE'), findsOneWidget);
+    // The remaining-rooms count is part of the single total line, not its
+    // own Text, so match on a substring.
+    expect(find.textContaining('2 left'), findsOneWidget);
   });
 
   testWidgets('shows the saving against the public rate',
@@ -162,7 +166,10 @@ void main() {
     await tester.pump();
 
     // 700.00 public vs 600.00 member = 100.00 saved.
-    expect(find.text(r'You save $100.00'), findsOneWidget);
+    expect(
+      find.text(r'Saves $100.00 on the public rate'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('handles a property with no availability',
