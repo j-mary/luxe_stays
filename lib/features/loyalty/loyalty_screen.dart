@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../app/router.dart';
+import '../../app/theme.dart';
 import '../../core/utils/date_x.dart';
 import '../../domain/loyalty.dart';
+import '../../shared/widgets/app_panel.dart';
 import '../../shared/widgets/app_states.dart';
+import '../../shared/widgets/section_heading.dart';
 import '../account/session_controller.dart';
 
 /// LuxeStays Rewards.
@@ -141,18 +144,23 @@ class _MemberView extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => ref.read(sessionProvider.notifier).refresh(),
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        // No page padding: the tier plate runs to both edges, which is what
+        // makes it read as the header of the screen rather than as the first
+        // item in a list. Everything after it is inset to the 20px page grid.
+        padding: const EdgeInsets.only(bottom: 36),
         children: <Widget>[
           _TierCard(member: member, rules: rules),
-          const SizedBox(height: 16),
           if (member.usableVouchers.isNotEmpty) ...<Widget>[
-            Text('Your rewards', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
+            const SectionHeading(label: 'YOUR REWARDS'),
             ...member.usableVouchers.map(
-              (LoyaltyVoucher voucher) => Card(
+              (LoyaltyVoucher voucher) => AppPanel(
+                margin: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: ListTile(
-                  leading: const Icon(Icons.confirmation_number_outlined),
-                  title: Text(voucher.name),
+                  leading: Icon(
+                    Icons.confirmation_number_outlined,
+                    color: theme.colorScheme.secondary,
+                  ),
+                  title: Text(voucher.name, style: theme.textTheme.titleSmall),
                   subtitle: Text(
                     '${voucher.valueLabel} · expires '
                     '${formatShortDate(voucher.expiresAt)}',
@@ -160,30 +168,18 @@ class _MemberView extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
           ],
-          Row(
-            children: <Widget>[
-              Text('Points activity', style: theme.textTheme.titleMedium),
-              const Spacer(),
-              if (session.ledger.isEmpty)
-                Text('No activity yet', style: theme.textTheme.bodySmall),
-            ],
+          SectionHeading(
+            label: 'POINTS ACTIVITY',
+            trailing: session.ledger.isEmpty
+                ? Text('No activity yet', style: theme.textTheme.bodySmall)
+                : null,
           ),
-          const SizedBox(height: 8),
           ...session.ledger.map(
             (PointsLedgerEntry entry) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: CircleAvatar(
-                backgroundColor: entry.isAccrual
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surfaceContainerHighest,
-                child: Icon(
-                  entry.isAccrual ? Icons.add_rounded : Icons.remove_rounded,
-                  size: 18,
-                ),
-              ),
-              title: Text(entry.description),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              leading: _LedgerMark(isAccrual: entry.isAccrual),
+              title: Text(entry.description, style: theme.textTheme.bodyLarge),
               subtitle: Text(
                 <String>[
                   formatShortDate(entry.occurredAt),
@@ -194,7 +190,7 @@ class _MemberView extends ConsumerWidget {
               ),
               trailing: Text(
                 '${entry.isAccrual ? '+' : ''}${entry.points}',
-                style: theme.textTheme.titleSmall?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   color: entry.isAccrual
                       ? theme.colorScheme.primary
                       : theme.colorScheme.onSurfaceVariant,
@@ -217,34 +213,59 @@ class _MemberView extends ConsumerWidget {
   }
 }
 
+/// A square plate rather than a circular avatar. The rest of the screen is
+/// built from rules and right angles; one circle in the ledger would be the
+/// only round thing on it.
+class _LedgerMark extends StatelessWidget {
+  const _LedgerMark({required this.isAccrual});
+
+  final bool isAccrual;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = Theme.of(context).colorScheme;
+    return Container(
+      width: 34,
+      height: 34,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Icon(
+        isAccrual ? Icons.add_rounded : Icons.remove_rounded,
+        size: 17,
+        color: isAccrual ? colors.primary : colors.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
 /// The membership panel — the one place the app is allowed to be emphatic.
 ///
-/// Rendered as a dark plate with brass accents rather than a tinted container,
-/// because tier status is the single moment in the product where a visual
-/// flourish is earned. Everywhere else the accent is spent on actions only.
+/// Rendered on the shared ink plate with gold accents rather than in a tinted
+/// container, because tier status is the single moment in the product where a
+/// visual flourish is earned. Everywhere else the accent is spent on actions
+/// only. The plate colours come from [AppTheme] so this panel, the member mark
+/// on a search result and any image scrim stay the same near-black.
 class _TierCard extends StatelessWidget {
   const _TierCard({required this.member, required this.rules});
 
   final LoyaltyMember member;
   final LoyaltyProgramRules rules;
 
-  static const Color _brass = Color(0xFFC9A876);
+  static const Color _brass = AppTheme.plateGold;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool isLight = theme.brightness == Brightness.light;
-    final Color panel = isLight ? const Color(0xFF14201B) : const Color(0xFF20241F);
-    const Color onPanel = Color(0xFFF4F3EF);
+    const Color onPanel = AppTheme.onPlate;
     final Color onPanelMuted = onPanel.withAlpha(150);
     final int? toNext = member.nightsToNextTier;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
-      decoration: BoxDecoration(
-        color: panel,
-        borderRadius: BorderRadius.circular(10),
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 26, 24, 26),
+      decoration: const BoxDecoration(color: AppTheme.plate),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -331,8 +352,8 @@ class _TierCard extends StatelessWidget {
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: onPanel.withAlpha(46)),
+                        borderRadius: BorderRadius.circular(2),
+                        border: Border.all(color: onPanel.withAlpha(56)),
                       ),
                       child: Text(
                         benefit,
