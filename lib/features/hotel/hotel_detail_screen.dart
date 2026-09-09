@@ -9,6 +9,7 @@ import '../../domain/cart.dart';
 import '../../domain/hotel.dart';
 import '../../domain/media.dart';
 import '../../domain/rate.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_states.dart';
 import '../../shared/widgets/media_image.dart';
 import '../cart/cart_controller.dart';
@@ -356,9 +357,7 @@ class _OfferRow extends ConsumerWidget {
                         ref
                             .read(cartProvider.notifier)
                             .add(hotel: hotel, offer: offer);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Added to your cart')),
-                        );
+                        showAppSnackBar(context, 'Added to your cart');
                       },
                 child: Text(inCart ? 'In cart' : 'Select'),
               ),

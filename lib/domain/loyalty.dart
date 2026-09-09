@@ -81,6 +81,8 @@ class LoyaltyMember {
     this.vouchers = const <LoyaltyVoucher>[],
     this.benefits = const <String>[],
     this.contactId,
+    this.email,
+    this.phone,
   });
 
   /// Salesforce `LoyaltyProgramMember.Id`.
@@ -105,6 +107,11 @@ class LoyaltyMember {
 
   /// Salesforce `Contact.Id` - the CRM identity behind the membership.
   final String? contactId;
+
+  /// Contact details from the CRM. Present so that checkout does not ask a
+  /// signed-in guest to retype what Salesforce already holds.
+  final String? email;
+  final String? phone;
 
   String get displayName => '$firstName $lastName';
 
@@ -150,6 +157,8 @@ class LoyaltyMember {
       vouchers: vouchers ?? this.vouchers,
       benefits: benefits,
       contactId: contactId,
+      email: email,
+      phone: phone,
     );
   }
 }

@@ -75,6 +75,8 @@ Router salesforceRouter() {
         'firstName': m.firstName,
         'lastName': m.lastName,
         'contactId': m.contactId,
+        'email': m.email,
+        'mobilePhone': m.phone,
         'enrollmentDate': DateTime.now()
             .subtract(const Duration(days: 900))
             .toIso8601String(),

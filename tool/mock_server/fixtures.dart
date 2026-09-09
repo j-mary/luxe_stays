@@ -347,6 +347,8 @@ class MockMember {
     required this.lifetime,
     required this.nights,
     required this.contactId,
+    required this.email,
+    required this.phone,
   });
 
   final String membershipNumber;
@@ -359,6 +361,8 @@ class MockMember {
   final int lifetime;
   final int nights;
   final String contactId;
+  final String email;
+  final String phone;
 }
 
 const List<MockMember> mockMembers = <MockMember>[
@@ -373,6 +377,8 @@ const List<MockMember> mockMembers = <MockMember>[
     lifetime: 214500,
     nights: 31,
     contactId: '0035j00000ContactA',
+    email: 'amara.okonkwo@example.com',
+    phone: '+234 802 555 0142',
   ),
   MockMember(
     membershipNumber: 'LS-100077',
@@ -385,6 +391,8 @@ const List<MockMember> mockMembers = <MockMember>[
     lifetime: 890300,
     nights: 58,
     contactId: '0035j00000ContactB',
+    email: 'tomas.ferreira@example.com',
+    phone: '+351 912 555 088',
   ),
   MockMember(
     membershipNumber: 'LS-100901',
@@ -397,6 +405,8 @@ const List<MockMember> mockMembers = <MockMember>[
     lifetime: 21400,
     nights: 12,
     contactId: '0035j00000ContactC',
+    email: 'r.mocheje@example.com',
+    phone: '+234 803 555 0117',
   ),
 ];
 

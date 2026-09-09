@@ -30,6 +30,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final TextEditingController _requests = TextEditingController();
   bool _marketingOptIn = false;
 
+  /// Whether the guest-details form is shown. A signed-in guest whose CRM
+  /// record is complete gets a summary and an Edit affordance instead: asking
+  /// someone to retype what we already know is the fastest way to lose them at
+  /// the last step.
+  bool _editingDetails = true;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +44,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _lastName.text = guest.lastName;
     _email.text = guest.email;
     _phone.text = guest.phone;
+    _editingDetails = !guest.isValid;
   }
 
   @override
@@ -62,7 +69,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   Future<void> _pay() async {
-    if (!(_formKey.currentState?.validate() ?? false)) {
+    // When the form is collapsed its fields are not in the tree, so
+    // Form.validate() would trivially pass. Check the collected value instead
+    // and reveal the form if anything is actually missing.
+    if (!_editingDetails) {
+      if (!_collect().isValid) {
+        setState(() => _editingDetails = true);
+        return;
+      }
+    } else if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
     final CheckoutController controller = ref.read(checkoutProvider.notifier);
@@ -126,98 +141,105 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 _InlineFailure(message: state.failure!.userMessage),
                 const SizedBox(height: 12),
               ],
-              Text(
-                'Lead guest',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextFormField(
-                      controller: _firstName,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'First name',
-                        border: OutlineInputBorder(),
+              if (!_editingDetails)
+                _GuestSummary(
+                  guest: state.guest,
+                  onEdit: () => setState(() => _editingDetails = true),
+                )
+              else ...<Widget>[
+                Text(
+                  'Lead guest',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextFormField(
+                        controller: _firstName,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'First name',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (String? value) =>
+                            (value == null || value.trim().length < 2)
+                                ? 'Required'
+                                : null,
                       ),
-                      validator: (String? value) =>
-                          (value == null || value.trim().length < 2)
-                              ? 'Required'
-                              : null,
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _lastName,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'Last name',
-                        border: OutlineInputBorder(),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _lastName,
+                        textInputAction: TextInputAction.next,
+                        decoration: const InputDecoration(
+                          labelText: 'Last name',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (String? value) =>
+                            (value == null || value.trim().length < 2)
+                                ? 'Required'
+                                : null,
                       ),
-                      validator: (String? value) =>
-                          (value == null || value.trim().length < 2)
-                              ? 'Required'
-                              : null,
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    helperText: 'Your confirmation is sent here',
+                    border: OutlineInputBorder(),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  helperText: 'Your confirmation is sent here',
-                  border: OutlineInputBorder(),
+                  validator: (String? value) {
+                    final GuestDetails probe =
+                        _collect().copyWith(email: value ?? '');
+                    return probe.isValid || (value ?? '').contains('@')
+                        ? null
+                        : 'Enter a valid email';
+                  },
                 ),
-                validator: (String? value) {
-                  final GuestDetails probe =
-                      _collect().copyWith(email: value ?? '');
-                  return probe.isValid || (value ?? '').contains('@')
-                      ? null
-                      : 'Enter a valid email';
-                },
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _phone,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Mobile',
-                  helperText: 'The property may contact you about your arrival',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Mobile',
+                    helperText: 'The property may contact you about your arrival',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (String? value) =>
+                      (value == null || value.trim().length < 6)
+                          ? 'Enter a contact number'
+                          : null,
                 ),
-                validator: (String? value) =>
-                    (value == null || value.trim().length < 6)
-                        ? 'Enter a contact number'
-                        : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _requests,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Special requests (optional)',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _requests,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Special requests (optional)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-                value: _marketingOptIn,
-                onChanged: (bool? value) =>
-                    setState(() => _marketingOptIn = value ?? false),
-                title: const Text('Send me LuxeStays offers'),
-                subtitle: const Text(
-                  'Opt-in only. Consent is recorded against your Salesforce '
-                  'contact record.',
+                const SizedBox(height: 4),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _marketingOptIn,
+                  onChanged: (bool? value) =>
+                      setState(() => _marketingOptIn = value ?? false),
+                  title: const Text('Send me LuxeStays offers'),
+                  subtitle: const Text(
+                    'Opt-in only. Consent is recorded against your Salesforce '
+                    'contact record.',
+                  ),
                 ),
-              ),
+              ],
               const Divider(height: 32),
               _OrderSummary(cart: cart, totals: totals),
               const SizedBox(height: 20),
@@ -318,6 +340,65 @@ class _OrderSummary extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// What we already know about the guest, with one way to change it.
+class _GuestSummary extends StatelessWidget {
+  const _GuestSummary({required this.guest, required this.onEdit});
+
+  final GuestDetails guest;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colors = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: colors.outlineVariant),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('LEAD GUEST', style: theme.textTheme.labelSmall),
+                const SizedBox(height: 7),
+                Text(guest.fullName, style: theme.textTheme.titleSmall),
+                const SizedBox(height: 3),
+                Text(guest.email, style: theme.textTheme.bodySmall),
+                Text(guest.phone, style: theme.textTheme.bodySmall),
+                if (guest.membershipNumber != null) ...<Widget>[
+                  const SizedBox(height: 7),
+                  Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.workspace_premium_outlined,
+                        size: 13,
+                        color: colors.secondary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        guest.membershipNumber!,
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(color: colors.secondary),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          TextButton(onPressed: onEdit, child: const Text('Edit')),
+        ],
+      ),
     );
   }
 }

@@ -20,6 +20,8 @@ class SalesforceMemberDto {
     this.contactId,
     this.enrollmentDate,
     this.benefits = const <String>[],
+    this.email,
+    this.phone,
   });
 
   /// Reads the shape returned by
@@ -61,6 +63,12 @@ class SalesforceMemberDto {
       lifetimePoints: JsonRead.intOf(json, 'lifetimePoints', fallback: 0),
       qualifyingNights: JsonRead.intOf(json, 'qualifyingNights', fallback: 0),
       contactId: JsonRead.stringOrNull(json, 'contactId'),
+      // Salesforce exposes these either on the member or on the associated
+      // contact, depending on how the org shapes the Connect response.
+      email: JsonRead.stringOrNull(json, 'email') ?? _contact(json, 'email'),
+      phone: JsonRead.stringOrNull(json, 'mobilePhone') ??
+          JsonRead.stringOrNull(json, 'phone') ??
+          _contact(json, 'mobilePhone'),
       enrollmentDate: JsonRead.dateOrNull(json, 'enrollmentDate'),
       benefits: (json['memberBenefits'] as List<Object?>? ?? const <Object?>[])
           .map((Object? e) {
@@ -86,6 +94,17 @@ class SalesforceMemberDto {
   final String? contactId;
   final DateTime? enrollmentDate;
   final List<String> benefits;
+  final String? email;
+  final String? phone;
+
+  static String? _contact(Map<String, Object?> json, String field) {
+    final Object? contact =
+        json['associatedContactDetails'] ?? json['associatedContact'];
+    if (contact is Map) {
+      return (contact[field] as Object?)?.toString();
+    }
+    return null;
+  }
 
   LoyaltyMember toDomain(
       {List<LoyaltyVoucher> vouchers = const <LoyaltyVoucher>[]}) {
@@ -103,6 +122,8 @@ class SalesforceMemberDto {
       vouchers: vouchers,
       benefits: benefits,
       contactId: contactId,
+      email: email,
+      phone: phone,
     );
   }
 }

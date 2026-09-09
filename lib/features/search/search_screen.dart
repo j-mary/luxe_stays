@@ -7,6 +7,7 @@ import '../../data/hotel_repository.dart';
 import '../../domain/cart.dart';
 import '../../domain/rate.dart';
 import '../../domain/search.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_states.dart';
 import '../account/session_controller.dart';
 import '../cart/cart_controller.dart';
@@ -168,15 +169,12 @@ class SearchScreen extends ConsumerWidget {
                                 hotel: result.hotel,
                                 offer: offer,
                               );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${result.hotel.name} added'),
-                              action: SnackBarAction(
-                                label: 'View cart',
-                                onPressed: () => Navigator.of(context)
-                                    .pushNamed(Routes.cart),
-                              ),
-                            ),
+                          showAppSnackBar(
+                            context,
+                            '${result.hotel.name} added',
+                            actionLabel: 'View cart',
+                            onAction: () =>
+                                Navigator.of(context).pushNamed(Routes.cart),
                           );
                         },
                       );

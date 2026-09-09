@@ -8,6 +8,7 @@ import '../../core/result.dart';
 import '../../core/utils/date_x.dart';
 import '../../domain/cart.dart';
 import '../../domain/loyalty.dart';
+import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_states.dart';
 import '../account/session_controller.dart';
 import 'cart_controller.dart';
@@ -240,12 +241,9 @@ class _LoyaltyPanelState extends ConsumerState<_LoyaltyPanel> {
     }
     setState(() => _redeeming = false);
     result.fold<void>(
-      (LoyaltyVoucher voucher) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${voucher.valueLabel} applied')),
-      ),
-      (Failure failure) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.userMessage)),
-      ),
+      (LoyaltyVoucher voucher) =>
+          showAppSnackBar(context, '${voucher.valueLabel} applied'),
+      (Failure failure) => showAppSnackBar(context, failure.userMessage),
     );
   }
 

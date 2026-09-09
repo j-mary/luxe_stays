@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/router.dart';
 import '../../../integrations/cms/cms_models.dart';
+import '../../../shared/widgets/app_snack_bar.dart';
 import '../../home/offers_provider.dart';
 import '../search_controller.dart';
 
@@ -56,12 +57,9 @@ class OffersStrip extends ConsumerWidget {
                         ref.read(searchProvider.notifier);
                     controller.applyPromotionCode(list[index].promotionCode);
                     controller.search(forceRefresh: true);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Offer ${list[index].promotionCode} applied',
-                        ),
-                      ),
+                    showAppSnackBar(
+                      context,
+                      'Offer ${list[index].promotionCode} applied',
                     );
                   },
                 ),

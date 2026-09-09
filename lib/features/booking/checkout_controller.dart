@@ -76,11 +76,12 @@ class CheckoutController extends Notifier<CheckoutState> {
     final SessionState session = ref.read(sessionProvider);
     final LoyaltyMember? member = session.member;
     return CheckoutState(
+      // A signed-in guest is not asked to retype what the CRM already holds.
       guest: GuestDetails(
         firstName: member?.firstName ?? '',
         lastName: member?.lastName ?? '',
-        email: '',
-        phone: '',
+        email: member?.email ?? '',
+        phone: member?.phone ?? '',
         membershipNumber: member?.membershipNumber,
       ),
     );
