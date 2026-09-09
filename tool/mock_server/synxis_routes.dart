@@ -312,7 +312,7 @@ Router synxisRouter() {
         'Currency': (roomStay['Currency'] as String?) ?? hotel.currency,
         'CreatedUtc': DateTime.now().toUtc().toIso8601String(),
         'ItineraryUrl':
-            'http://localhost:8080/cms/pages/itinerary?ref=$confirmation',
+            '${originOf(request)}/cms/pages/itinerary?ref=$confirmation',
         'PaymentLast4': '4242',
         'GuestLastName': guest['LastName'],
       },

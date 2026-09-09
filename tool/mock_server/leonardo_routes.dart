@@ -19,6 +19,7 @@ Router leonardoRouter() {
 
   router.get('/v1/properties/<hotelId>/media',
       (Request request, String hotelId) {
+    final String origin = originOf(request);
     final Map<String, String> q = request.url.queryParameters;
     final String? roomTypeCode = q['roomTypeCode'];
     final String? category = q['category'];
@@ -29,6 +30,7 @@ Router leonardoRouter() {
       for (int i = 1; i <= 3; i++) {
         assets.add(
           _asset(
+            origin: origin,
             hotelId: hotelId,
             id: '$hotelId-$roomTypeCode-$i',
             category: 'Guest Room',
@@ -41,6 +43,7 @@ Router leonardoRouter() {
     } else {
       assets.add(
         _asset(
+          origin: origin,
           hotelId: hotelId,
           id: '$hotelId-hero',
           category: 'Exterior',
@@ -54,6 +57,7 @@ Router leonardoRouter() {
         }
         assets.add(
           _asset(
+            origin: origin,
             hotelId: hotelId,
             id: '$hotelId-${cat.toLowerCase().replaceAll(' ', '-')}',
             category: cat,
@@ -69,6 +73,7 @@ Router leonardoRouter() {
       // One asset with a lapsed licence, so the client-side filter is exercised.
       assets.add(
         _asset(
+          origin: origin,
           hotelId: hotelId,
           id: '$hotelId-archive',
           category: 'Lobby',
@@ -113,6 +118,7 @@ Router leonardoRouter() {
 }
 
 Map<String, Object?> _asset({
+  required String origin,
   required String hotelId,
   required String id,
   required String category,
@@ -123,7 +129,7 @@ Map<String, Object?> _asset({
 }) {
   return <String, Object?>{
     'mediaId': id,
-    'deliveryUrl': 'http://localhost:8080/leonardo/img/$id.png',
+    'deliveryUrl': '$origin/leonardo/img/$id.png',
     'category': category,
     'caption': caption,
     'credit': 'Property photography',
@@ -157,6 +163,7 @@ Router leonardoAiRouter() {
   });
 
   router.get('/generations/<id>', (Request request, String id) {
+    final String origin = originOf(request);
     final DateTime? started = jobs[id];
     if (started == null) {
       return jsonResponse(
@@ -175,8 +182,7 @@ Router leonardoAiRouter() {
             ? <Map<String, Object?>>[
                 <String, Object?>{
                   'id': '${id}_0',
-                  'url':
-                      'http://localhost:8080/leonardo/img/$id.png?w=1024&h=640',
+                  'url': '$origin/leonardo/img/$id.png?w=1024&h=640',
                 },
               ]
             : <Map<String, Object?>>[],

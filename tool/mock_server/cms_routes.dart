@@ -37,6 +37,7 @@ Router cmsRouter() {
 
   router.get('/spaces/<space>/environments/<env>/entries',
       (Request request, String space, String env) {
+    final String origin = originOf(request);
     final Map<String, String> q = request.url.queryParameters;
     final String contentType = q['content_type'] ?? '';
     final List<Map<String, Object?>> items = <Map<String, Object?>>[];
@@ -61,7 +62,7 @@ Router cmsRouter() {
           assets.add(
             assetRecord(
               assetId,
-              'http://localhost:8080/leonardo/img/${hotel.id}-hero.png',
+              '$origin/leonardo/img/${hotel.id}-hero.png',
               '${hotel.name} hero',
             ),
           );
@@ -101,7 +102,7 @@ Router cmsRouter() {
           assets.add(
             assetRecord(
               assetId,
-              'http://localhost:8080/leonardo/img/${offer.id}.png',
+              '$origin/leonardo/img/${offer.id}.png',
               offer.title,
             ),
           );
@@ -121,7 +122,7 @@ Router cmsRouter() {
               'hotelIds': offer.hotelIds,
               'image': assetLink(assetId),
               'termsUrl':
-                  'http://localhost:8080/cms/pages/offer-terms?code=${offer.promotionCode}',
+                  '$origin/cms/pages/offer-terms?code=${offer.promotionCode}',
               'startsAt': DateTime.now()
                   .subtract(const Duration(days: 30))
                   .toIso8601String(),
@@ -146,7 +147,7 @@ Router cmsRouter() {
           'fields': <String, Object?>{
             'slug': slug,
             'title': _titleForSlug(slug),
-            'url': 'http://localhost:8080/cms/pages/$slug',
+            'url': '$origin/cms/pages/$slug',
             'updatedAt': DateTime.now().toIso8601String(),
           },
         });

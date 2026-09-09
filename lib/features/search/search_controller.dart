@@ -53,6 +53,21 @@ class HotelSearchController extends Notifier<SearchState> {
         unawaited(search(forceRefresh: true));
       }
     });
+    // Run the first search immediately. The screen opens on results rather
+    // than on an empty form, because `results` starts as AsyncValue.loading()
+    // and nothing else would ever resolve it — the skeletons would sit there
+    // until the guest happened to press Search.
+    //
+    // Deferred with a microtask because a Notifier may not mutate its own
+    // state while `build()` is still running.
+    bool disposed = false;
+    ref.onDispose(() => disposed = true);
+    unawaited(Future<void>.microtask(() {
+      if (!disposed) {
+        unawaited(search());
+      }
+    }));
+
     return SearchState(query: SearchQuery.initial());
   }
 

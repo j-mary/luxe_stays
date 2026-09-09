@@ -131,6 +131,25 @@ class IdempotencyStore {
 
 final IdempotencyStore idempotency = IdempotencyStore();
 
+/// The origin the client actually used to reach this server.
+///
+/// Every URL the mock hands back — media, hosted payment pages, CMS pages,
+/// itineraries — has to be reachable *from the client*, and the client is not
+/// necessarily on this machine. An Android emulator reaches the host at
+/// 10.0.2.2 and a physical device at a LAN address, so a hard-coded
+/// "http://localhost:8080" in a response body points the app back at itself and
+/// every image silently fails while the JSON around it loads fine.
+///
+/// `requestedUri` carries the Host header the client sent, which is exactly the
+/// address it can reach us on.
+String originOf(Request request) {
+  final Uri uri = request.requestedUri;
+  if (uri.host.isEmpty) {
+    return 'http://localhost:8080';
+  }
+  return uri.origin;
+}
+
 String isoDate(DateTime date) => '${date.year.toString().padLeft(4, '0')}-'
     '${date.month.toString().padLeft(2, '0')}-'
     '${date.day.toString().padLeft(2, '0')}';

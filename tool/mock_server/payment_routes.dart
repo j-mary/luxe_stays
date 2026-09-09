@@ -37,7 +37,7 @@ Router paymentRouter() {
       'amountMinor': amount,
       'currency': currency,
       'provider': 'mock-psp',
-      'hostedPageUrl': 'http://localhost:8080/pay?intent=$intentId',
+      'hostedPageUrl': '${originOf(request)}/pay?intent=$intentId',
       'returnUrl':
           (body['returnUrl'] as String?) ?? 'luxestays://payment-success',
       'expiresAt':

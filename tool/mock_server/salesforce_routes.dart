@@ -114,7 +114,7 @@ Router salesforceRouter() {
     return jsonResponse(<String, Object?>{
       'access_token': 'mock_access_${DateTime.now().millisecondsSinceEpoch}',
       'refresh_token': 'mock_refresh_token',
-      'instance_url': 'http://localhost:8080/salesforce',
+      'instance_url': '${originOf(request)}/salesforce',
       'token_type': 'Bearer',
       'expires_in': 7200,
       'scope': 'api refresh_token openid',
