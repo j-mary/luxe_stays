@@ -1,0 +1,53 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# pubspec.lock IS committed: this is an application, so the exact resolved
+# versions are part of the build. Only libraries exclude it.
+
+# IDEs
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+*.swp
+
+# Android
+android/.gradle/
+android/local.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/key.properties
+
+# iOS / macOS — generated files that embed absolute machine paths
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/App.framework/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_export_environment.sh
+**/DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Coverage and test output
+coverage/
+test/failures/
+
+# Secrets — never commit signing material or real credentials
+.env
+*.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision
+
+# OS noise
+.DS_Store

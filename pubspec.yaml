@@ -1,0 +1,57 @@
+name: luxe_stays
+description: >-
+  LuxeStays - a proof-of-concept Flutter application for a luxury-hotel OTA.
+  Demonstrates a hybrid (native + WebView) architecture integrating a headless
+  CMS, Leonardo image management, Salesforce (CRM / Loyalty Management) and
+  Sabre SynXis (central reservations / booking engine).
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State management -----------------------------------------------------
+  # Riverpod 2.x. Chosen over provider/bloc for compile-safe DI: every
+  # integration client is a provider, so tests override the transport layer
+  # without touching widget code. See docs/01-ARCHITECTURE.md.
+  flutter_riverpod: ^2.5.1
+
+  # --- Networking -----------------------------------------------------------
+  # Dio for its interceptor chain: auth token refresh, retry with backoff,
+  # correlation-id propagation and redaction-aware logging all plug in here.
+  dio: ^5.7.0
+
+  # --- Hybrid / WebView -----------------------------------------------------
+  # Official Flutter WebView plugin (Android WebView + WKWebView).
+  webview_flutter: ^4.10.0
+
+  # --- Media ----------------------------------------------------------------
+  # Disk+memory cached images for Leonardo-served hotel media.
+  cached_network_image: ^3.4.0
+
+  # --- Security -------------------------------------------------------------
+  # Keychain / Android Keystore backed storage for OAuth tokens.
+  flutter_secure_storage: ^9.2.2
+  # SHA-256 for the PKCE code challenge used by the Salesforce OAuth flow.
+  crypto: ^3.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+  mocktail: ^1.0.4
+
+  # The mock back end (tool/mock_server) runs from these dev dependencies:
+  #   dart run tool/mock_server/server.dart
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+
+flutter:
+  uses-material-design: true
