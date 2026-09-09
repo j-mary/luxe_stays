@@ -128,6 +128,37 @@ docs/             the documentation table above
 
 ---
 
+## The visual system
+
+[`lib/app/theme.dart`](lib/app/theme.dart) is the whole of it. Four rules:
+
+| Rule | Why |
+|---|---|
+| **Serif for voice, sans for work** | Display sizes, section headings, property names and prices are set in a serif; body copy, labels and anything dense stays in the platform sans, which is what keeps a rate list legible at 12.5px. The break sits at `titleSmall`. |
+| **Gold is the accent, deep gold is the action** | A true gold cannot carry white text at body size, so the filled-button colour is a deepened antique gold that clears 4.5:1 against white (~4.9:1), and the brighter gold is spent on marks, rules and overlines where the contrast requirement is lighter. |
+| **Corners are nearly square** | 2px on controls and panels, none on imagery. Rounded elevated cards read as software; a hairline rule and a sharp edge read as print. |
+| **Emphasis comes from a rule, not a fill** | Section breaks are a letterspaced overline plus a rule to the margin ([`SectionHeading`](lib/shared/widgets/section_heading.dart)); grouping is a hairline border ([`AppPanel`](lib/shared/widgets/app_panel.dart)); the one saturated surface in the app is the ink plate behind the membership panel. |
+
+Two consequences worth knowing before editing it.
+
+`ColorScheme.fromSeed` tints *every* container from the seed hue, so all the
+container roles are overridden back to a neutral warm grey and `surfaceTint` is
+set to transparent — otherwise a gold wash appears over scrolled-under app bars
+and every tonal surface.
+
+The serif is resolved from fonts already on the device (`Georgia`, falling back
+through `Times New Roman` and `Noto Serif`), so there is no bundled binary and
+no runtime download; the exact face differs slightly between iOS and Android by
+design. `AppTheme.serif(...)` exposes the family plus its fallback chain for the
+occasional one-off size, such as the masthead.
+
+`cardTheme`, `appBarTheme` and `inputDecorationTheme` are deliberately *not*
+set: those data classes were re-typed in the Flutter 3.32 theme migration, so
+setting them pins the project to one side of that change. `AppPanel` composes
+the same result from a `Container`, which does not.
+
+---
+
 ## Status and honesty about the mocks
 
 This is a proof of concept, and it says so where it matters:
