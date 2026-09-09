@@ -209,7 +209,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     labelText: 'Mobile',
-                    helperText: 'The property may contact you about your arrival',
+                    helperText:
+                        'The property may contact you about your arrival',
                     border: OutlineInputBorder(),
                   ),
                   validator: (String? value) =>

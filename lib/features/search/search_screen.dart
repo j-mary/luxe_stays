@@ -47,8 +47,7 @@ class SearchScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final SearchState state = ref.watch(searchProvider);
-    final HotelSearchController controller =
-        ref.read(searchProvider.notifier);
+    final HotelSearchController controller = ref.read(searchProvider.notifier);
     final Cart cart = ref.watch(cartProvider);
     final SessionState session = ref.watch(sessionProvider);
 

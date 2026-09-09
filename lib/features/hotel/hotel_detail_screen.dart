@@ -120,8 +120,7 @@ class _HotelDetailBody extends ConsumerWidget {
                     style: theme.textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 14),
-                  Text(hotel.editorial!.body,
-                      style: theme.textTheme.bodyLarge),
+                  Text(hotel.editorial!.body, style: theme.textTheme.bodyLarge),
                   if (hotel.editorial!.signatureExperience != null) ...<Widget>[
                     const SizedBox(height: 20),
                     _SignatureCard(text: hotel.editorial!.signatureExperience!),

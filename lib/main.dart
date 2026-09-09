@@ -80,9 +80,8 @@ void _warnIfUnreachableBackend(AppConfig config, AppLogger logger) {
     return;
   }
   final bool isAndroid = defaultTargetPlatform == TargetPlatform.android;
-  final bool pointsAtLoopback =
-      config.synxisBaseUrl.contains('localhost') ||
-          config.synxisBaseUrl.contains('127.0.0.1');
+  final bool pointsAtLoopback = config.synxisBaseUrl.contains('localhost') ||
+      config.synxisBaseUrl.contains('127.0.0.1');
   if (!isAndroid || !pointsAtLoopback) {
     return;
   }

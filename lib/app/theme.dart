@@ -130,13 +130,11 @@ abstract final class AppTheme {
       dividerColor: scheme.outlineVariant,
       splashFactory: InkRipple.splashFactory,
       textTheme: _textTheme(scheme),
-
       dividerTheme: DividerThemeData(
         color: scheme.outlineVariant,
         thickness: 1,
         space: 1,
       ),
-
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size(64, 54),
