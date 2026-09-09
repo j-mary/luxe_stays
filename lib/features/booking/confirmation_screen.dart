@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/router.dart';
 import '../../core/utils/date_x.dart';
 import '../../domain/booking.dart';
+import '../../shared/widgets/app_panel.dart';
 import '../../shared/widgets/app_states.dart';
 import 'checkout_controller.dart';
 
@@ -71,7 +72,7 @@ class ConfirmationScreen extends ConsumerWidget {
           ),
           if (outcome.failures.isNotEmpty) ...<Widget>[
             const SizedBox(height: 8),
-            Card(
+            AppPanel(
               color: theme.colorScheme.errorContainer,
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -122,7 +123,7 @@ class _ReservationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Card(
+    return AppPanel(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -198,7 +199,7 @@ class _LoyaltySummary extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final ThemeData theme = Theme.of(context);
-    return Card(
+    return AppPanel(
       color: theme.colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),

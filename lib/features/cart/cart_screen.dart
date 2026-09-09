@@ -8,6 +8,7 @@ import '../../core/result.dart';
 import '../../core/utils/date_x.dart';
 import '../../domain/cart.dart';
 import '../../domain/loyalty.dart';
+import '../../shared/widgets/app_panel.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_states.dart';
 import '../account/session_controller.dart';
@@ -86,8 +87,8 @@ class _CartLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+    return AppPanel(
+      margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -205,8 +206,8 @@ class _SignInPrompt extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+    return AppPanel(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: ListTile(
         leading: const Icon(Icons.workspace_premium_rounded),
         title: const Text('Sign in to use your points'),
@@ -258,8 +259,8 @@ class _LoyaltyPanelState extends ConsumerState<_LoyaltyPanel> {
     final int maxPoints = ref.read(cartProvider.notifier).maxRedeemablePoints();
     final int selected = widget.cart.pointsToRedeem;
 
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+    return AppPanel(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -377,8 +378,8 @@ class _TotalsPanel extends ConsumerWidget {
       );
     }
 
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+    return AppPanel(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

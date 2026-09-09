@@ -280,7 +280,7 @@ class _InlineFailure extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Row(
         children: <Widget>[
@@ -359,7 +359,7 @@ class _GuestSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(2),
         border: Border.all(color: colors.outlineVariant),
       ),
       child: Row(
