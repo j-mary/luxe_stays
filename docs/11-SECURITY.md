@@ -122,7 +122,8 @@ working.
 
 * HTTPS everywhere in staging and production. Cleartext is permitted only in
   the **debug** Android manifest and only for `localhost`
-  (`tool/patch_platforms.sh`), so the mock server works.
+  (`android/app/src/debug/AndroidManifest.xml`), so the mock server works.
+  Release builds never permit it.
 * **Certificate pinning** is the natural next step for the payment and CRS
   hosts. It is not implemented here, and that is a deliberate omission rather
   than an oversight: pinning without a rotation plan and a kill switch turns a

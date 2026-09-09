@@ -102,9 +102,6 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Generate platform projects
-        run: flutter create --platforms=android,ios --org com.luxestays --project-name luxe_stays .
-
       - name: Decode Android keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}

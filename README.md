@@ -20,16 +20,16 @@ loads in WebViews. No credentials, no network, no vendor sandbox required.
 
 ---
 
-## Run it in three commands
+## Run it
+
+The Android, iOS and web host projects are committed, so there is no
+`flutter create` step — clone and fetch dependencies:
 
 ```bash
 flutter pub get
-flutter create --platforms=android,ios,web --org com.luxestays --project-name luxe_stays .   # once
-bash tool/patch_platforms.sh                                                                  # once
 ```
 
-Run `make format` once first — the sources are hand-written, and CI checks
-formatting. Then, in two terminals:
+Then, in two terminals:
 
 ```bash
 # 1 — the mock SynXis / Salesforce / CMS / Leonardo / PSP back end
@@ -141,6 +141,7 @@ This is a proof of concept, and it says so where it matters:
   document is explicit about which parts are verified and which are modelled.
 * **Salesforce and Contentful shapes follow their public documentation**, which
   is linked from the relevant document.
-* **No platform host projects are committed.** Run `flutter create` as shown
-  above; `tool/patch_platforms.sh` then applies the two WebView-related
-  platform settings.
+* **The platform host projects are committed**, with the two WebView-related
+  settings already applied: cleartext to `localhost` in the Android *debug*
+  manifest only, and an ATS exception plus the `luxestays://` URL scheme on iOS.
+  `tool/patch_platforms.sh` re-applies them if you ever regenerate the hosts.

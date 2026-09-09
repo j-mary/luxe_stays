@@ -46,10 +46,10 @@ every PR against the mocks. Vendor changes do not respect your sprint boundary.
 
 ### Job 3 — build
 
-Runs only on `main` and on `v*` tags. Generates the platform host projects
-(they are not committed), decodes signing material from secrets into
-`RUNNER_TEMP`, and builds an AAB and an IPA with the production `--dart-define`
-values.
+Runs only on `main` and on `v*` tags. Decodes signing material from secrets
+into `RUNNER_TEMP`, and builds an AAB and an IPA with the production
+`--dart-define` values. The host projects are committed, so there is nothing to
+generate first.
 
 ## Configuration and flavours
 

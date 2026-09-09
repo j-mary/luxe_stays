@@ -2,27 +2,25 @@
 
 ## First run
 
+The Android, iOS and web host projects are committed, so there is no
+`flutter create` step:
+
 ```bash
 cd luxe_stays
 flutter pub get
-
-# The platform host projects are not committed — generate them once.
-flutter create --platforms=android,ios,web --org com.luxestays --project-name luxe_stays .
-bash tool/patch_platforms.sh
 ```
 
-`patch_platforms.sh` does two things the generated projects do not:
+Two platform settings a WebView-based app needs are already applied and
+committed:
 
-* Android: a **debug-only** manifest allowing cleartext to `localhost`.
+* Android: a **debug-only** manifest allowing cleartext to `localhost`
+  (`android/app/src/debug/AndroidManifest.xml`). Release builds are unaffected.
 * iOS: an ATS exception for `localhost`, and registration of the `luxestays://`
-  URL scheme so the PSP and booking engine can redirect back.
+  URL scheme so the payment provider and booking engine can redirect back
+  (`ios/Runner/Info.plist`).
 
-Run the formatter once before anything else — the sources are hand-written and
-`dart format` has opinions about line breaks that no human matches exactly:
-
-```bash
-make format          # dart format lib test integration_test tool
-```
+`tool/patch_platforms.sh` re-applies both, should you ever regenerate the host
+projects from scratch.
 
 Then, in two terminals:
 
@@ -145,14 +143,14 @@ price.
 | Symptom | Cause | Fix |
 |---|---|---|
 | Search spins forever | Mock server not running, or wrong host for the platform | `curl http://localhost:8080/health`; use `10.0.2.2` on the Android emulator |
-| Images are grey boxes | Leonardo base URL unreachable, or cleartext blocked | Check the base URL; on Android confirm `tool/patch_platforms.sh` ran |
+| Images are grey boxes | Leonardo base URL unreachable, or cleartext blocked | Check the base URL; on Android confirm `android/app/src/debug/AndroidManifest.xml` is present |
 | WebView is blank | Origin not in the allowlist | Look for `blocked webview navigation` in the log; the origin must match a configured base URL exactly, including port |
 | Payment page loads, buttons do nothing | Bridge shim not injected, or the origin check failed | Look for `webview bridge: handshake complete`; if absent, check `onPageFinished` fired |
 | `Add` does nothing on a card | The offer is already in the cart | By design — `CartController.contains` de-duplicates by offer id |
 | No member rates | Not signed in | Member rate plans are returned by the CRS *only* when the request carries a membership number |
 | Points slider disabled | Balance below the 2,000-point minimum | Sign in as `LS-100042` |
 | `flutter run` fails on Android with a minSdk error | `webview_flutter` needs 24+, `flutter_secure_storage` needs 23+ | Raise `minSdkVersion` in `android/app/build.gradle` |
-| Cleartext HTTP blocked on iOS | ATS | Confirm the `Info.plist` exception from `tool/patch_platforms.sh` |
+| Cleartext HTTP blocked on iOS | ATS | Confirm the `NSExceptionDomains` entry for `localhost` in `ios/Runner/Info.plist` |
 
 ## Reading the logs
 

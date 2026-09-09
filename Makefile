@@ -1,5 +1,5 @@
 # LuxeStays - developer entry points.
-.PHONY: help bootstrap platforms mock run run-emulator run-lan adb-reverse ip \
+.PHONY: help bootstrap patch-platforms mock run run-emulator run-lan adb-reverse ip \
         analyze format test coverage integration ci clean
 
 FLAVOR ?= dev
@@ -34,8 +34,7 @@ help:
 bootstrap: ## Fetch dependencies
 	flutter pub get
 
-platforms: ## Generate the android/ios/web host projects (run once)
-	flutter create --platforms=android,ios,web --org com.luxestays --project-name luxe_stays .
+patch-platforms: ## Re-apply the WebView platform settings (only after regenerating hosts)
 	bash tool/patch_platforms.sh
 
 mock: ## Run the mock SynXis / Salesforce / CMS / Leonardo / PSP back end
