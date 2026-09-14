@@ -87,9 +87,9 @@ class RoomOffer {
   String get currency => taxesAndFees.currency;
 
   Money get roomSubtotal => nightlyRates.values.fold(
-        Money.zero(currency),
-        (Money acc, Money night) => acc + night,
-      );
+    Money.zero(currency),
+    (Money acc, Money night) => acc + night,
+  );
 
   Money get total => roomSubtotal + taxesAndFees;
 
@@ -123,11 +123,12 @@ class CancellationPolicy {
   });
 
   const CancellationPolicy.nonRefundable()
-      : description = 'Non-refundable. This rate cannot be changed or '
-            'cancelled.',
-        freeUntil = null,
-        penalty = null,
-        isNonRefundable = true;
+    : description =
+          'Non-refundable. This rate cannot be changed or '
+          'cancelled.',
+      freeUntil = null,
+      penalty = null,
+      isNonRefundable = true;
 
   final String description;
   final DateTime? freeUntil;

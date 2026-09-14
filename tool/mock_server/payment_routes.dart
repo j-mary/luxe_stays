@@ -11,19 +11,42 @@ import 'web_pages.dart';
 /// a URL to open. The hosted page itself is served from `/pay`.
 Router paymentRouter() {
   final Router router = Router();
+  final Map<String, String> fingerprints = {};
+  final Map<String, Object?> responses = {};
 
   router.post('/intents', (Request request) async {
     final String? key = request.headers['idempotency-key'];
-    final Object? replay = idempotency.get(key);
+    final Map<String, Object?> body = await readJson(request);
+    final String fingerprint = body.toString();
+    if (key != null &&
+        fingerprints.containsKey(key) &&
+        fingerprints[key] != fingerprint) {
+      return mockError(
+        409,
+        'IDEMPOTENCY_CONFLICT',
+        'Key was used with another request.',
+      );
+    }
+    final Object? replay = responses[key];
     if (replay != null) {
-      return jsonResponse(replay,
-          headers: <String, String>{'x-idempotent-replay': '1'});
+      return jsonResponse(
+        replay,
+        headers: <String, String>{'x-idempotent-replay': '1'},
+      );
     }
 
-    final Map<String, Object?> body = await readJson(request);
     final int amount = (body['amountMinor'] as num?)?.toInt() ?? 0;
     final String currency = (body['currency'] as String?) ?? 'USD';
-    final String intentId = 'pi_${DateTime.now().millisecondsSinceEpoch}';
+    if (amount < 0 ||
+        currency != 'USD' ||
+        (body['cartId'] as String? ?? '').isEmpty) {
+      return mockError(
+        422,
+        'INVALID_PAYMENT',
+        'Supply a cart, non-negative amount and USD currency.',
+      );
+    }
+    final String intentId = reference('pi_');
 
     paymentIntents[intentId] = MockIntent(
       id: intentId,
@@ -40,10 +63,14 @@ Router paymentRouter() {
       'hostedPageUrl': '${originOf(request)}/pay?intent=$intentId',
       'returnUrl':
           (body['returnUrl'] as String?) ?? 'luxestays://payment-success',
-      'expiresAt':
-          DateTime.now().add(const Duration(minutes: 20)).toIso8601String(),
+      'expiresAt': DateTime.now()
+          .add(const Duration(minutes: 20))
+          .toIso8601String(),
     };
-    idempotency.put(key, payload);
+    if (key != null) {
+      fingerprints[key] = fingerprint;
+      responses[key] = payload;
+    }
     return jsonResponse(payload, status: 201);
   });
 
@@ -52,10 +79,10 @@ Router paymentRouter() {
   router.get('/intents/<intentId>', (Request request, String intentId) {
     final MockIntent? intent = paymentIntents[intentId];
     if (intent == null) {
-      return jsonResponse(
-        <String, Object?>{'error': 'Unknown intent', 'code': 'NOT_FOUND'},
-        status: 404,
-      );
+      return jsonResponse(<String, Object?>{
+        'error': 'Unknown intent',
+        'code': 'NOT_FOUND',
+      }, status: 404);
     }
     return jsonResponse(<String, Object?>{
       'intentId': intent.id,
@@ -71,12 +98,15 @@ Router paymentRouter() {
   });
 
   /// Called by the hosted page when the guest submits.
-  router.post('/intents/<intentId>/authorize',
-      (Request request, String intentId) async {
+  router.post('/intents/<intentId>/authorize', (
+    Request request,
+    String intentId,
+  ) async {
     final MockIntent? intent = paymentIntents[intentId];
     if (intent == null) {
-      return jsonResponse(<String, Object?>{'error': 'Unknown intent'},
-          status: 404);
+      return jsonResponse(<String, Object?>{
+        'error': 'Unknown intent',
+      }, status: 404);
     }
     final Map<String, Object?> body = await readJson(request);
     final String outcome = (body['outcome'] as String?) ?? 'authorize';
@@ -108,6 +138,15 @@ Router paymentRouter() {
     });
   });
 
+  router.post('/intents/<intentId>/void', (Request request, String intentId) {
+    final MockIntent? intent = paymentIntents[intentId];
+    if (intent == null) return mockError(404, 'NOT_FOUND', 'Unknown intent.');
+    intent.status = 'cancelled';
+    return jsonResponse(<String, Object?>{
+      'intentId': intentId,
+      'status': intent.status,
+    });
+  });
   return router;
 }
 

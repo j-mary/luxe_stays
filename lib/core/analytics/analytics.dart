@@ -44,14 +44,18 @@ class LoggingAnalyticsService implements AnalyticsService {
   final AppLogger _logger;
 
   @override
-  void screen(String name,
-      {Map<String, Object?> parameters = const <String, Object?>{}}) {
+  void screen(
+    String name, {
+    Map<String, Object?> parameters = const <String, Object?>{},
+  }) {
     _logger.info('screen:$name', context: parameters);
   }
 
   @override
-  void event(String name,
-      {Map<String, Object?> parameters = const <String, Object?>{}}) {
+  void event(
+    String name, {
+    Map<String, Object?> parameters = const <String, Object?>{},
+  }) {
     _logger.info('event:$name', context: parameters);
   }
 
@@ -62,12 +66,15 @@ class LoggingAnalyticsService implements AnalyticsService {
     required String currency,
     required int pointsEarned,
   }) {
-    _logger.info('event:purchase', context: <String, Object?>{
-      'transaction_id': transactionId,
-      'value_minor': valueMinor,
-      'currency': currency,
-      'points_earned': pointsEarned,
-    });
+    _logger.info(
+      'event:purchase',
+      context: <String, Object?>{
+        'transaction_id': transactionId,
+        'value_minor': valueMinor,
+        'currency': currency,
+        'points_earned': pointsEarned,
+      },
+    );
   }
 
   @override

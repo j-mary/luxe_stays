@@ -7,8 +7,11 @@ import 'package:shelf/shelf.dart';
 
 final Random rng = Random(20260908);
 
-Response jsonResponse(Object? body,
-    {int status = 200, Map<String, String>? headers}) {
+Response jsonResponse(
+  Object? body, {
+  int status = 200,
+  Map<String, String>? headers,
+}) {
   return Response(
     status,
     body: jsonEncode(body),
@@ -37,7 +40,10 @@ Future<Map<String, Object?>> readJson(Request request) async {
     return <String, Object?>{};
   }
   final Object? decoded = jsonDecode(body);
-  return decoded is Map<String, Object?> ? decoded : <String, Object?>{};
+  if (decoded is! Map<String, Object?>) {
+    throw const FormatException('Expected JSON object');
+  }
+  return decoded;
 }
 
 /// Fault-injection knobs, driven by `--latency` / `--fail-rate` on the command
@@ -47,10 +53,7 @@ Future<Map<String, Object?>> readJson(Request request) async {
 /// app behaves when SynXis is slow or Salesforce is down - which is exactly the
 /// behaviour the retry, timeout and degradation logic exists for.
 class ChaosSettings {
-  ChaosSettings({
-    this.latency = Duration.zero,
-    this.failureRate = 0,
-  });
+  ChaosSettings({this.latency = Duration.zero, this.failureRate = 0});
 
   Duration latency;
   double failureRate;
@@ -71,34 +74,49 @@ Middleware chaosMiddleware() {
       final String? forced = request.headers['x-mock-fail'];
       if (forced != null) {
         final int status = int.tryParse(forced) ?? 500;
-        return jsonResponse(
-          <String, Object?>{
-            'Errors': <Map<String, String>>[
-              <String, String>{
-                'Code': 'FORCED_FAILURE',
-                'Message': 'Injected by x-mock-fail header',
-              },
-            ],
-          },
-          status: status,
-        );
+        return jsonResponse(<String, Object?>{
+          'Errors': <Map<String, String>>[
+            <String, String>{
+              'Code': 'FORCED_FAILURE',
+              'Message': 'Injected by x-mock-fail header',
+            },
+          ],
+        }, status: status);
       }
 
       if (chaos.failureRate > 0 && rng.nextDouble() < chaos.failureRate) {
-        return jsonResponse(
-          <String, Object?>{
-            'Errors': <Map<String, String>>[
-              <String, String>{
-                'Code': 'UPSTREAM_UNAVAILABLE',
-                'Message': 'Injected failure',
-              },
-            ],
-          },
-          status: 503,
-        );
+        return jsonResponse(<String, Object?>{
+          'Errors': <Map<String, String>>[
+            <String, String>{
+              'Code': 'UPSTREAM_UNAVAILABLE',
+              'Message': 'Injected failure',
+            },
+          ],
+        }, status: 503);
       }
 
-      final Response response = await inner(request);
+      if (request.method == 'OPTIONS') {
+        return Response.ok(
+          '',
+          headers: {
+            'access-control-allow-origin': '*',
+            'access-control-allow-headers': '*',
+            'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+          },
+        );
+      }
+      Response response;
+      try {
+        response = await inner(request);
+      } on FormatException {
+        response = mockError(400, 'INVALID_JSON', 'Send a valid JSON object.');
+      } on TypeError {
+        response = mockError(
+          422,
+          'INVALID_FIELDS',
+          'Check request field types.',
+        );
+      }
       return response.change(
         headers: <String, String>{
           'access-control-allow-origin': '*',
@@ -150,7 +168,8 @@ String originOf(Request request) {
   return uri.origin;
 }
 
-String isoDate(DateTime date) => '${date.year.toString().padLeft(4, '0')}-'
+String isoDate(DateTime date) =>
+    '${date.year.toString().padLeft(4, '0')}-'
     '${date.month.toString().padLeft(2, '0')}-'
     '${date.day.toString().padLeft(2, '0')}';
 
@@ -169,3 +188,11 @@ String reference(String prefix) {
   ).join();
   return '$prefix$body';
 }
+
+/// Application-owned error envelope, not a vendor response schema.
+Response mockError(int status, String code, String message) =>
+    jsonResponse(<String, Object?>{
+      'Errors': <Object?>[
+        <String, String>{'Code': code, 'Message': message},
+      ],
+    }, status: status);

@@ -10,12 +10,10 @@ import '../../domain/booking.dart';
 ///   2. open the returned hosted page in a WebView;
 ///   3. receive a result over the bridge and hand the intent id to SynXis.
 ///
-/// It never sees, stores, transmits or processes card data. That is what keeps
-/// the mobile app out of PCI-DSS scope (SAQ-A rather than SAQ-A-EP), and it is
-/// the single most consequential architectural decision in the payment flow.
-/// See `docs/11-SECURITY.md`.
+/// The demo collects no real card data. Production PCI scope depends on the
+/// chosen PSP, embedding method and assessor; a WebView does not establish SAQ eligibility.
 class PaymentApi {
-  PaymentApi({required ApiClient client}) : _client = client;
+  PaymentApi({required this._client});
 
   final ApiClient _client;
 
@@ -35,7 +33,7 @@ class PaymentApi {
         'currency': amount.currency,
         'cartId': cartId,
         'returnUrl': returnUrl,
-        if (membershipNumber != null) 'membershipNumber': membershipNumber,
+        'membershipNumber': ?membershipNumber,
         'metadata': metadata,
       },
       decode: (Object? json) {
@@ -48,13 +46,22 @@ class PaymentApi {
           ),
           hostedPageUrl: JsonRead.string(root, 'hostedPageUrl'),
           returnUrl: JsonRead.stringOrNull(root, 'returnUrl') ?? returnUrl,
-          expiresAt: JsonRead.dateOrNull(root, 'expiresAt') ??
+          expiresAt:
+              JsonRead.dateOrNull(root, 'expiresAt') ??
               DateTime.now().add(const Duration(minutes: 20)),
           provider: JsonRead.stringOrNull(root, 'provider') ?? 'mock-psp',
         );
       },
     );
   }
+
+  /// Demo BFF compensation endpoint; not a provider-specific PSP API.
+  Future<Result<bool>> voidIntent(String intentId) => _client.postJson<bool>(
+    '/payments/intents/$intentId/void',
+    idempotencyKey: 'void_$intentId',
+    decode: (Object? json) =>
+        JsonRead.object(json, 'root')['status'] == 'cancelled',
+  );
 
   /// Server-side truth for an intent.
   ///
@@ -67,8 +74,8 @@ class PaymentApi {
       '/payments/intents/$intentId',
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        final String status =
-            (JsonRead.stringOrNull(root, 'status') ?? '').toLowerCase();
+        final String status = (JsonRead.stringOrNull(root, 'status') ?? '')
+            .toLowerCase();
         return PaymentResult(
           intentId: JsonRead.string(root, 'intentId'),
           status: switch (status) {

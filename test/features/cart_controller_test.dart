@@ -10,13 +10,13 @@ import 'package:luxe_stays/domain/search.dart';
 import 'package:luxe_stays/features/cart/cart_controller.dart';
 
 Hotel _hotel(String id) => Hotel(
-      id: id,
-      chainId: '12345',
-      name: 'Hotel $id',
-      city: 'Paris',
-      country: 'FR',
-      starRating: 5,
-    );
+  id: id,
+  chainId: '12345',
+  name: 'Hotel $id',
+  city: 'Paris',
+  country: 'FR',
+  starRating: 5,
+);
 
 RoomOffer _offer({
   required String hotelId,
@@ -55,7 +55,10 @@ void main() {
 
   test('adds a line and totals it', () {
     final CartController controller = container.read(cartProvider.notifier);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
 
     final Cart cart = container.read(cartProvider);
     expect(cart.lineCount, 1);
@@ -74,7 +77,10 @@ void main() {
 
   test('holds lines from different properties', () {
     final CartController controller = container.read(cartProvider.notifier);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     controller.add(
       hotel: _hotel('H-2'),
       offer: _offer(hotelId: 'H-2', nightlyMinor: 45000),
@@ -87,7 +93,10 @@ void main() {
   test('bumps the revision on every mutation so idempotency keys change', () {
     final CartController controller = container.read(cartProvider.notifier);
     expect(container.read(cartProvider).revision, 0);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     expect(container.read(cartProvider).revision, 1);
     controller.remove(container.read(cartProvider).items.first.lineId);
     expect(container.read(cartProvider).revision, greaterThan(1));
@@ -95,15 +104,20 @@ void main() {
 
   test('a blocked line prevents checkout', () {
     final CartController controller = container.read(cartProvider.notifier);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     expect(container.read(cartProvider).canCheckout, isTrue);
 
     controller.replaceItems(
       container
           .read(cartProvider)
           .items
-          .map((CartItem item) =>
-              item.copyWith(status: CartLineStatus.priceChanged))
+          .map(
+            (CartItem item) =>
+                item.copyWith(status: CartLineStatus.priceChanged),
+          )
           .toList(),
     );
     expect(container.read(cartProvider).canCheckout, isFalse);
@@ -111,13 +125,19 @@ void main() {
 
   test('signed-out guests cannot redeem points', () {
     final CartController controller = container.read(cartProvider.notifier);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     expect(controller.maxRedeemablePoints(), 0);
   });
 
   test('a voucher discounts the total but never below zero', () {
     final CartController controller = container.read(cartProvider.notifier);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     controller.applyVoucher(
       LoyaltyVoucher(
         id: 'v1',
@@ -137,7 +157,10 @@ void main() {
 
   test('derived totals include an accrual estimate', () {
     final CartController controller = container.read(cartProvider.notifier);
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     final CartTotals totals = container.read(cartTotalsProvider);
     expect(totals.subtotal, const Money(65000, 'USD'));
     // 650 whole units x 10 points, Classic multiplier.
@@ -147,7 +170,10 @@ void main() {
   test('clearing the cart resets loyalty adjustments and issues a new id', () {
     final CartController controller = container.read(cartProvider.notifier);
     final String firstId = container.read(cartProvider).id;
-    controller.add(hotel: _hotel('H-1'), offer: _offer(hotelId: 'H-1'));
+    controller.add(
+      hotel: _hotel('H-1'),
+      offer: _offer(hotelId: 'H-1'),
+    );
     controller.clear();
     final Cart cart = container.read(cartProvider);
     expect(cart.isEmpty, isTrue);

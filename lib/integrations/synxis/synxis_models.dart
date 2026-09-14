@@ -5,9 +5,9 @@ import '../../domain/booking.dart';
 import '../../domain/rate.dart';
 import '../../domain/search.dart';
 
-/// Data-transfer objects for the SynXis contract.
+/// DTOs for the LuxeStays demo booking gateway, NOT a SynXis wire schema.
 ///
-/// These deliberately mirror the *vendor's* vocabulary (`RatePlanCode`,
+/// These use application-owned vocabulary (`RatePlanCode`,
 /// `NightlyRates`, `ConfirmationNumber`), PascalCase and all. Domain types live
 /// in `lib/domain/` and speak our vocabulary. `SynxisMappers` is the only place
 /// the two meet, so a vendor rename never ripples into the UI.
@@ -95,14 +95,14 @@ class SynxisRoomTypeDto {
   final List<String> mediaIds;
 
   RoomType toDomain() => RoomType(
-        code: code,
-        name: name,
-        description: description,
-        maxOccupancy: maxOccupancy,
-        sizeSqm: sizeSqm,
-        bedding: bedding,
-        imageIds: mediaIds,
-      );
+    code: code,
+    name: name,
+    description: description,
+    maxOccupancy: maxOccupancy,
+    sizeSqm: sizeSqm,
+    bedding: bedding,
+    imageIds: mediaIds,
+  );
 }
 
 /// A priced product for one property.
@@ -133,11 +133,15 @@ class SynxisOfferDto {
   factory SynxisOfferDto.fromJson(Map<String, Object?> json, String hotelId) {
     final String currency = JsonRead.stringOrNull(json, 'Currency') ?? 'USD';
     final Map<DateTime, int> nightly = <DateTime, int>{};
-    for (final Map<String, Object?> night
-        in JsonRead.objectList(json['NightlyRates'], 'NightlyRates')) {
+    for (final Map<String, Object?> night in JsonRead.objectList(
+      json['NightlyRates'],
+      'NightlyRates',
+    )) {
       final DateTime date = JsonRead.dateOf(night, 'Date');
-      nightly[date.dateOnly] =
-          Money.fromApi(night['Amount'], currency).minorUnits;
+      nightly[date.dateOnly] = Money.fromApi(
+        night['Amount'],
+        currency,
+      ).minorUnits;
     }
     return SynxisOfferDto(
       hotelId: hotelId,
@@ -148,8 +152,10 @@ class SynxisOfferDto {
       ratePlanName: JsonRead.stringOrNull(json, 'RatePlanName') ?? '',
       currency: currency,
       nightlyRates: nightly,
-      taxesAndFeesMinor:
-          Money.fromApi(json['TaxesAndFees'], currency).minorUnits,
+      taxesAndFeesMinor: Money.fromApi(
+        json['TaxesAndFees'],
+        currency,
+      ).minorUnits,
       arrival: JsonRead.dateOf(json, 'Arrival'),
       departure: JsonRead.dateOf(json, 'Departure'),
       adults: JsonRead.intOf(json, 'Adults', fallback: 2),
@@ -198,7 +204,8 @@ class SynxisOfferDto {
   /// Deterministic offer id, so the same product from two searches is the same
   /// cart line rather than a duplicate.
   String get offerId =>
-      '$hotelId:${roomType.code}:$ratePlanCode:${arrival.iso8601Date}';
+      '$hotelId:${roomType.code}:$ratePlanCode:${arrival.iso8601Date}:'
+      '${departure.iso8601Date}:$adults:${childAges.join(',')}:$currency';
 
   RoomOffer toDomain() {
     return RoomOffer(
@@ -229,8 +236,9 @@ class SynxisOfferDto {
       isRefundable: isRefundable,
       roomsRemaining: roomsRemaining,
       inclusions: inclusions,
-      strikeThroughTotal:
-          publicTotalMinor == null ? null : Money(publicTotalMinor!, currency),
+      strikeThroughTotal: publicTotalMinor == null
+          ? null
+          : Money(publicTotalMinor!, currency),
     );
   }
 }
@@ -246,7 +254,9 @@ class SynxisAvailabilityDto {
     final Map<String, List<SynxisOfferDto>> grouped =
         <String, List<SynxisOfferDto>>{};
     for (final Map<String, Object?> entry in JsonRead.objectList(
-        json['HotelAvailability'], 'HotelAvailability')) {
+      json['HotelAvailability'],
+      'HotelAvailability',
+    )) {
       final String hotelId = JsonRead.string(entry, 'HotelId');
       grouped[hotelId] = JsonRead.objectList(entry['Offers'], 'Offers')
           .map((Map<String, Object?> o) => SynxisOfferDto.fromJson(o, hotelId))
@@ -377,10 +387,10 @@ class SynxisReservationDto {
   final String? paymentLast4;
 
   ReservationStatus get domainStatus => switch (status.toLowerCase()) {
-        'cancelled' || 'canceled' => ReservationStatus.cancelled,
-        'pending' => ReservationStatus.pending,
-        'modified' => ReservationStatus.modified,
-        'noshow' || 'no_show' => ReservationStatus.noShow,
-        _ => ReservationStatus.confirmed,
-      };
+    'cancelled' || 'canceled' => ReservationStatus.cancelled,
+    'pending' => ReservationStatus.pending,
+    'modified' => ReservationStatus.modified,
+    'noshow' || 'no_show' => ReservationStatus.noShow,
+    _ => ReservationStatus.confirmed,
+  };
 }

@@ -70,7 +70,7 @@ class MediaImage extends ConsumerWidget {
       fadeInDuration: const Duration(milliseconds: 180),
       placeholder: (BuildContext context, String _) =>
           _Placeholder(height: height, width: width),
-      errorWidget: (BuildContext context, String _, Object __) =>
+      errorWidget: (BuildContext context, String _, Object _) =>
           _Placeholder(height: height, width: width, failed: true),
     );
 
@@ -112,11 +112,7 @@ class _Placeholder extends StatelessWidget {
       color: colors.surfaceContainerHighest,
       alignment: Alignment.center,
       child: failed
-          ? Icon(
-              Icons.landscape_outlined,
-              size: 22,
-              color: colors.outline,
-            )
+          ? Icon(Icons.landscape_outlined, size: 22, color: colors.outline)
           : null,
     );
   }

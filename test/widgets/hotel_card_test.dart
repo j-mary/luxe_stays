@@ -48,8 +48,9 @@ RoomOffer _offer({
     quotedAt: DateTime.now(),
     isMemberRate: memberRate,
     roomsRemaining: roomsRemaining,
-    strikeThroughTotal:
-        publicTotalMinor == null ? null : Money(publicTotalMinor, 'USD'),
+    strikeThroughTotal: publicTotalMinor == null
+        ? null
+        : Money(publicTotalMinor, 'USD'),
   );
 }
 
@@ -76,7 +77,7 @@ HotelSearchResult _result({
 Future<void> _pump(WidgetTester tester, HotelSearchResult result) {
   return tester.pumpWidget(
     ProviderScope(
-      overrides: <Override>[
+      overrides: [
         mediaProviderProvider.overrideWithValue(
           const StaticMediaProvider(<String, List<MediaAsset>>{
             'H-1': <MediaAsset>[_asset],
@@ -95,8 +96,9 @@ Future<void> _pump(WidgetTester tester, HotelSearchResult result) {
 }
 
 void main() {
-  testWidgets('renders name, location and the lead-in nightly price',
-      (WidgetTester tester) async {
+  testWidgets('renders name, location and the lead-in nightly price', (
+    WidgetTester tester,
+  ) async {
     await _pump(tester, _result());
     await tester.pump();
 
@@ -108,8 +110,9 @@ void main() {
     expect(find.textContaining('total · 2 nights'), findsOneWidget);
   });
 
-  testWidgets('renders without CMS content - content is never load-bearing',
-      (WidgetTester tester) async {
+  testWidgets('renders without CMS content - content is never load-bearing', (
+    WidgetTester tester,
+  ) async {
     await _pump(tester, _result());
     await tester.pump();
 
@@ -118,8 +121,9 @@ void main() {
     expect(find.byType(HotelCard), findsOneWidget);
   });
 
-  testWidgets('shows the CMS headline when content has resolved',
-      (WidgetTester tester) async {
+  testWidgets('shows the CMS headline when content has resolved', (
+    WidgetTester tester,
+  ) async {
     await _pump(
       tester,
       _result(
@@ -137,13 +141,12 @@ void main() {
     );
   });
 
-  testWidgets('badges member rates and low inventory',
-      (WidgetTester tester) async {
+  testWidgets('badges member rates and low inventory', (
+    WidgetTester tester,
+  ) async {
     await _pump(
       tester,
-      _result(
-        offers: <RoomOffer>[_offer(memberRate: true, roomsRemaining: 2)],
-      ),
+      _result(offers: <RoomOffer>[_offer(memberRate: true, roomsRemaining: 2)]),
     );
     await tester.pump();
 
@@ -153,27 +156,24 @@ void main() {
     expect(find.textContaining('2 left'), findsOneWidget);
   });
 
-  testWidgets('shows the saving against the public rate',
-      (WidgetTester tester) async {
+  testWidgets('shows the saving against the public rate', (
+    WidgetTester tester,
+  ) async {
     await _pump(
       tester,
       _result(
-        offers: <RoomOffer>[
-          _offer(memberRate: true, publicTotalMinor: 70000),
-        ],
+        offers: <RoomOffer>[_offer(memberRate: true, publicTotalMinor: 70000)],
       ),
     );
     await tester.pump();
 
     // 700.00 public vs 600.00 member = 100.00 saved.
-    expect(
-      find.text(r'Saves $100.00 on the public rate'),
-      findsOneWidget,
-    );
+    expect(find.text(r'Saves $100.00 on the public rate'), findsOneWidget);
   });
 
-  testWidgets('handles a property with no availability',
-      (WidgetTester tester) async {
+  testWidgets('handles a property with no availability', (
+    WidgetTester tester,
+  ) async {
     await _pump(tester, _result(offers: <RoomOffer>[]));
     await tester.pump();
 

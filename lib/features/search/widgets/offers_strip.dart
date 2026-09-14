@@ -41,13 +41,14 @@ class OffersStrip extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: list.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
                 itemBuilder: (BuildContext context, int index) => _OfferCard(
                   offer: list[index],
                   width: _cardWidth,
                   onApply: () {
-                    final HotelSearchController controller =
-                        ref.read(searchProvider.notifier);
+                    final HotelSearchController controller = ref.read(
+                      searchProvider.notifier,
+                    );
                     controller.applyPromotionCode(list[index].promotionCode);
                     controller.search(forceRefresh: true);
                     showAppSnackBar(

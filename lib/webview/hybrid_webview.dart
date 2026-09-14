@@ -167,15 +167,22 @@ class _HybridWebViewState extends ConsumerState<HybridWebView> {
   ///     that a legitimate "read our privacy policy" link still works - but it
   ///     leaves the hybrid context, which is the point.
   NavigationDecision _onNavigationRequest(NavigationRequest request) {
-    final Uri uri = Uri.parse(request.url);
+    final Uri? parsed = Uri.tryParse(request.url);
+    if (parsed == null) return NavigationDecision.prevent;
+    final Uri uri = parsed;
 
     if (uri.scheme == 'luxestays') {
       final bool consumed = widget.onDeepLink?.call(uri) ?? false;
-      _logger.info('webview deep link ${uri.host} '
-          '(${consumed ? 'consumed' : 'ignored'})');
+      _logger.info(
+        'webview deep link ${uri.host} '
+        '(${consumed ? 'consumed' : 'ignored'})',
+      );
       return NavigationDecision.prevent;
     }
 
+    if (uri.scheme != 'http' && uri.scheme != 'https') {
+      return NavigationDecision.prevent;
+    }
     final bool allowed = _config.webViewAllowedOrigins.contains(uri.origin);
     if (!allowed) {
       _analytics.event(
@@ -324,7 +331,9 @@ class _WebViewErrorState extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 FilledButton(
-                    onPressed: onRetry, child: const Text('Try again')),
+                  onPressed: onRetry,
+                  child: const Text('Try again'),
+                ),
               ],
             ),
           ),

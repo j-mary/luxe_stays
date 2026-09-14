@@ -96,6 +96,7 @@ class CheckoutController extends Notifier<CheckoutState> {
   /// Returns the intent when the screen should open the payment WebView, or
   /// null when something needs the guest's attention first.
   Future<PaymentIntent?> beginPayment() async {
+    if (state.isBusy || state.step == CheckoutStep.awaitingPayment) return null;
     if (!state.guest.isValid) {
       state = state.copyWith(
         failure: const ClientFailure(
@@ -125,7 +126,8 @@ class CheckoutController extends Notifier<CheckoutState> {
         step: CheckoutStep.details,
         lineProblems: preparation.problems,
         failure: RateChangedFailure(
-          userMessage: 'Some prices changed while you were booking. '
+          userMessage:
+              'Some prices changed while you were booking. '
               'Please review your cart.',
           developerMessage: 'preparation blocked: ${preparation.problems}',
           previousTotalMinor: cart.subtotal.minorUnits,
@@ -137,13 +139,13 @@ class CheckoutController extends Notifier<CheckoutState> {
     }
 
     // Phase 2 - create the payment intent for the (possibly updated) total.
-    final Result<PaymentIntent> intentResult =
-        await repository.createPaymentIntent(
-      cart: ref.read(cartProvider),
-      rules: ref.read(loyaltyRulesProvider),
-      returnUrl: 'luxestays://payment-success',
-      membershipNumber: ref.read(sessionProvider).membershipNumber,
-    );
+    final Result<PaymentIntent> intentResult = await repository
+        .createPaymentIntent(
+          cart: ref.read(cartProvider),
+          rules: ref.read(loyaltyRulesProvider),
+          returnUrl: 'luxestays://payment-success',
+          membershipNumber: ref.read(sessionProvider).membershipNumber,
+        );
 
     return intentResult.fold<PaymentIntent?>(
       (PaymentIntent intent) {
@@ -162,6 +164,10 @@ class CheckoutController extends Notifier<CheckoutState> {
 
   /// Phase 3: the WebView returned. Verify, book, accrue.
   Future<void> completeWithPaymentResult(PaymentResult result) async {
+    if (state.step != CheckoutStep.awaitingPayment ||
+        result.intentId != state.intent?.intentId) {
+      return;
+    }
     if (result.status == PaymentStatus.cancelled) {
       state = state.copyWith(step: CheckoutStep.details);
       return;
@@ -169,14 +175,15 @@ class CheckoutController extends Notifier<CheckoutState> {
 
     state = state.copyWith(step: CheckoutStep.confirming, clearFailure: true);
 
-    final Result<BookingOutcome> outcome =
-        await ref.read(bookingRepositoryProvider).complete(
-              cart: ref.read(cartProvider),
-              guest: state.guest,
-              bridgeResult: result,
-              rules: ref.read(loyaltyRulesProvider),
-              member: ref.read(sessionProvider).member,
-            );
+    final Result<BookingOutcome> outcome = await ref
+        .read(bookingRepositoryProvider)
+        .complete(
+          cart: ref.read(cartProvider),
+          guest: state.guest,
+          bridgeResult: result,
+          rules: ref.read(loyaltyRulesProvider),
+          member: ref.read(sessionProvider).member,
+        );
 
     state = outcome.fold<CheckoutState>(
       (BookingOutcome booking) {
@@ -198,6 +205,4 @@ class CheckoutController extends Notifier<CheckoutState> {
 }
 
 final NotifierProvider<CheckoutController, CheckoutState> checkoutProvider =
-    NotifierProvider<CheckoutController, CheckoutState>(
-  CheckoutController.new,
-);
+    NotifierProvider<CheckoutController, CheckoutState>(CheckoutController.new);

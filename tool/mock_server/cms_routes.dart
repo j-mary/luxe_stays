@@ -14,12 +14,8 @@ Router cmsRouter() {
   final Router router = Router();
 
   Map<String, Object?> assetLink(String id) => <String, Object?>{
-        'sys': <String, Object?>{
-          'type': 'Link',
-          'linkType': 'Asset',
-          'id': id,
-        },
-      };
+    'sys': <String, Object?>{'type': 'Link', 'linkType': 'Asset', 'id': id},
+  };
 
   Map<String, Object?> assetRecord(String id, String url, String title) =>
       <String, Object?>{
@@ -35,8 +31,11 @@ Router cmsRouter() {
         },
       };
 
-  router.get('/spaces/<space>/environments/<env>/entries',
-      (Request request, String space, String env) {
+  router.get('/spaces/<space>/environments/<env>/entries', (
+    Request request,
+    String space,
+    String env,
+  ) {
     final String origin = originOf(request);
     final Map<String, String> q = request.url.queryParameters;
     final String contentType = q['content_type'] ?? '';
@@ -173,11 +172,11 @@ Router cmsRouter() {
 }
 
 String _titleForSlug(String slug) => switch (slug) {
-      'rewards-terms' => 'LuxeStays Rewards terms',
-      'offer-terms' => 'Offer terms',
-      'itinerary' => 'Your itinerary',
-      _ => 'LuxeStays',
-    };
+  'rewards-terms' => 'LuxeStays Rewards terms',
+  'offer-terms' => 'Offer terms',
+  'itinerary' => 'Your itinerary',
+  _ => 'LuxeStays',
+};
 
 String _pageHtml(String slug, String reference) {
   final String title = _titleForSlug(slug);

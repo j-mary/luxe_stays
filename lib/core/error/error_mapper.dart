@@ -16,50 +16,48 @@ class ErrorMapper {
     required this.vendorMessageReader,
   });
 
-  /// SynXis returns `{"Errors":[{"Code":"...","Message":"..."}]}` on the
-  /// Enterprise Platform REST endpoints.
+  /// Application-owned demo booking error envelope; not a SynXis contract.
   factory ErrorMapper.synxis() => ErrorMapper(
-        integration: 'synxis',
-        vendorCodeReader: (Object? body) =>
-            _firstOf(body, 'Errors', 'Code') ?? _stringAt(body, 'errorCode'),
-        vendorMessageReader: (Object? body) =>
-            _firstOf(body, 'Errors', 'Message') ?? _stringAt(body, 'message'),
-      );
+    integration: 'synxis',
+    vendorCodeReader: (Object? body) =>
+        _firstOf(body, 'Errors', 'Code') ?? _stringAt(body, 'errorCode'),
+    vendorMessageReader: (Object? body) =>
+        _firstOf(body, 'Errors', 'Message') ?? _stringAt(body, 'message'),
+  );
 
   /// Salesforce REST returns a *list*: `[{"errorCode":"...","message":"..."}]`.
   factory ErrorMapper.salesforce() => ErrorMapper(
-        integration: 'salesforce',
-        vendorCodeReader: (Object? body) {
-          if (body is List && body.isNotEmpty) {
-            return _stringAt(body.first, 'errorCode');
-          }
-          return _stringAt(body, 'errorCode') ?? _stringAt(body, 'error');
-        },
-        vendorMessageReader: (Object? body) {
-          if (body is List && body.isNotEmpty) {
-            return _stringAt(body.first, 'message');
-          }
-          return _stringAt(body, 'message') ??
-              _stringAt(body, 'error_description');
-        },
-      );
+    integration: 'salesforce',
+    vendorCodeReader: (Object? body) {
+      if (body is List && body.isNotEmpty) {
+        return _stringAt(body.first, 'errorCode');
+      }
+      return _stringAt(body, 'errorCode') ?? _stringAt(body, 'error');
+    },
+    vendorMessageReader: (Object? body) {
+      if (body is List && body.isNotEmpty) {
+        return _stringAt(body.first, 'message');
+      }
+      return _stringAt(body, 'message') ?? _stringAt(body, 'error_description');
+    },
+  );
 
   /// Contentful returns `{"sys":{"id":"NotFound"},"message":"..."}`.
   factory ErrorMapper.cms() => ErrorMapper(
-        integration: 'cms',
-        vendorCodeReader: (Object? body) {
-          final Object? sys = _at(body, 'sys');
-          return _stringAt(sys, 'id');
-        },
-        vendorMessageReader: (Object? body) => _stringAt(body, 'message'),
-      );
+    integration: 'cms',
+    vendorCodeReader: (Object? body) {
+      final Object? sys = _at(body, 'sys');
+      return _stringAt(sys, 'id');
+    },
+    vendorMessageReader: (Object? body) => _stringAt(body, 'message'),
+  );
 
-  /// Leonardo returns `{"error":"...","code":"..."}`.
+  /// The demo Leonardo gateway returns `{"error":"...","code":"..."}`.
   factory ErrorMapper.leonardo() => ErrorMapper(
-        integration: 'leonardo',
-        vendorCodeReader: (Object? body) => _stringAt(body, 'code'),
-        vendorMessageReader: (Object? body) => _stringAt(body, 'error'),
-      );
+    integration: 'leonardo',
+    vendorCodeReader: (Object? body) => _stringAt(body, 'code'),
+    vendorMessageReader: (Object? body) => _stringAt(body, 'error'),
+  );
 
   final String integration;
   final String? Function(Object? body) vendorCodeReader;
@@ -74,7 +72,8 @@ class ErrorMapper {
     }
     if (error is FormatException) {
       return ContractFailure(
-        developerMessage: '[$integration] response was not valid JSON: '
+        developerMessage:
+            '[$integration] response was not valid JSON: '
             '${error.message}',
         field: '<root>',
         correlationId: correlationId,
@@ -90,7 +89,8 @@ class ErrorMapper {
   }
 
   Failure _mapDio(DioException e, {String? correlationId}) {
-    final String? cid = correlationId ??
+    final String? cid =
+        correlationId ??
         (e.requestOptions.headers['X-Correlation-Id'] as Object?)?.toString();
 
     // Exhaustive on purpose - no `default`. When Dio 5.11 added
@@ -102,7 +102,8 @@ class ErrorMapper {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
         return NetworkFailure(
-          developerMessage: '[$integration] timeout (${e.type.name}) calling '
+          developerMessage:
+              '[$integration] timeout (${e.type.name}) calling '
               '${e.requestOptions.method} ${e.requestOptions.path}',
           correlationId: cid,
           cause: e,
@@ -129,7 +130,8 @@ class ErrorMapper {
         // a NetworkFailure: replaying the request re-downloads and re-decodes
         // the same body, so it is not retryable.
         return ServerFailure(
-          developerMessage: '[$integration] response transform timed out for '
+          developerMessage:
+              '[$integration] response transform timed out for '
               '${e.requestOptions.method} ${e.requestOptions.path} - payload '
               'is likely larger than expected',
           statusCode: 0,
@@ -138,7 +140,8 @@ class ErrorMapper {
         );
       case DioExceptionType.unknown:
         return ServerFailure(
-          developerMessage: '[$integration] unknown transport error: '
+          developerMessage:
+              '[$integration] unknown transport error: '
               '${e.message}',
           statusCode: 0,
           correlationId: cid,
@@ -155,7 +158,8 @@ class ErrorMapper {
     final Object? body = response?.data;
     final String? vendorCode = _safe(() => vendorCodeReader(body));
     final String? vendorMessage = _safe(() => vendorMessageReader(body));
-    final String dev = '[$integration] HTTP $status '
+    final String dev =
+        '[$integration] HTTP $status '
         '${e.requestOptions.method} ${e.requestOptions.path} '
         'vendorCode=$vendorCode vendorMessage=$vendorMessage';
 

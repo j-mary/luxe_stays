@@ -17,15 +17,12 @@ typedef TokenRefresher = Future<OAuthTokens?> Function();
 /// the classic refresh-token stampede that invalidates its own rotation.
 class AuthInterceptor extends QueuedInterceptor {
   AuthInterceptor({
-    required TokenStore store,
-    required String tokenKey,
-    required TokenRefresher refresher,
-    required AppLogger logger,
+    required this._store,
+    required this._tokenKey,
+    required this._refresher,
+    required this._logger,
     this.onAuthenticationLost,
-  })  : _store = store,
-        _tokenKey = tokenKey,
-        _refresher = refresher,
-        _logger = logger;
+  });
 
   /// Requests marked with this extra skip the interceptor entirely - used by
   /// the token endpoint itself, otherwise refresh would recurse forever.

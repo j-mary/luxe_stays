@@ -51,17 +51,19 @@ class CartController extends Notifier<Cart> {
       revision: state.revision + 1,
     );
 
-    ref.read(analyticsProvider).event(
-      AnalyticsEvents.addToCart,
-      parameters: <String, Object?>{
-        'hotel_id': hotel.id,
-        'offer_id': offer.offerId,
-        'value_minor': offer.total.minorUnits,
-        'currency': offer.total.currency,
-        'nights': offer.stay.nights,
-        'member_rate': offer.isMemberRate,
-      },
-    );
+    ref
+        .read(analyticsProvider)
+        .event(
+          AnalyticsEvents.addToCart,
+          parameters: <String, Object?>{
+            'hotel_id': hotel.id,
+            'offer_id': offer.offerId,
+            'value_minor': offer.total.minorUnits,
+            'currency': offer.total.currency,
+            'nights': offer.stay.nights,
+            'member_rate': offer.isMemberRate,
+          },
+        );
   }
 
   void remove(String lineId) {
@@ -99,7 +101,9 @@ class CartController extends Notifier<Cart> {
     if (member == null) {
       return 0;
     }
-    return ref.read(loyaltyRulesProvider).maxRedeemablePoints(
+    return ref
+        .read(loyaltyRulesProvider)
+        .maxRedeemablePoints(
           balance: member.pointsBalance,
           basketTotal: state.subtotal,
         );
@@ -130,32 +134,32 @@ class CartController extends Notifier<Cart> {
       );
     }
 
-    final Result<LoyaltyVoucher> result =
-        await ref.read(salesforceRepositoryProvider).redeemPoints(
-              membershipNumber: member.membershipNumber,
-              points: points,
-              currency: state.currency,
-              cartId: state.id,
-            );
+    final Result<LoyaltyVoucher> result = await ref
+        .read(salesforceRepositoryProvider)
+        .redeemPoints(
+          membershipNumber: member.membershipNumber,
+          points: points,
+          currency: state.currency,
+          cartId: state.id,
+        );
 
-    result.fold<void>(
-      (LoyaltyVoucher voucher) {
-        state = state.copyWith(
-          appliedVoucher: voucher,
-          pointsToRedeem: 0,
-          revision: state.revision + 1,
-        );
-        ref.read(sessionProvider.notifier).applyPointsDelta(-points);
-        ref.read(analyticsProvider).event(
-          AnalyticsEvents.pointsRedeemed,
-          parameters: <String, Object?>{
-            'points': points,
-            'voucher_id': voucher.id,
-          },
-        );
-      },
-      (Failure _) {},
-    );
+    result.fold<void>((LoyaltyVoucher voucher) {
+      state = state.copyWith(
+        appliedVoucher: voucher,
+        pointsToRedeem: 0,
+        revision: state.revision + 1,
+      );
+      ref.read(sessionProvider.notifier).applyPointsDelta(-points);
+      ref
+          .read(analyticsProvider)
+          .event(
+            AnalyticsEvents.pointsRedeemed,
+            parameters: <String, Object?>{
+              'points': points,
+              'voucher_id': voucher.id,
+            },
+          );
+    }, (Failure _) {});
     return result;
   }
 

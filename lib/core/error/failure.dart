@@ -25,11 +25,11 @@ sealed class Failure implements Exception {
 
   /// Whether the caller may safely retry the same request.
   bool get isRetryable => switch (this) {
-        NetworkFailure() => true,
-        ServerFailure(:final statusCode) => statusCode >= 500,
-        RateLimitFailure() => true,
-        _ => false,
-      };
+    NetworkFailure() => true,
+    ServerFailure(:final statusCode) => statusCode >= 500,
+    RateLimitFailure() => true,
+    _ => false,
+  };
 
   @override
   String toString() =>
@@ -39,7 +39,8 @@ sealed class Failure implements Exception {
 /// No usable connection, DNS failure, TLS failure or timeout.
 final class NetworkFailure extends Failure {
   const NetworkFailure({
-    super.userMessage = 'We could not reach LuxeStays. Check your connection '
+    super.userMessage =
+        'We could not reach LuxeStays. Check your connection '
         'and try again.',
     required super.developerMessage,
     super.correlationId,
@@ -68,7 +69,8 @@ final class ClientFailure extends Failure {
 /// 5xx, or a vendor returning a 200 with a fault body.
 final class ServerFailure extends Failure {
   const ServerFailure({
-    super.userMessage = 'Something went wrong on our side. Please try again '
+    super.userMessage =
+        'Something went wrong on our side. Please try again '
         'in a moment.',
     required super.developerMessage,
     required this.statusCode,
@@ -94,7 +96,8 @@ final class AuthFailure extends Failure {
 /// 429 or a vendor throttling response. Carries the server-suggested wait.
 final class RateLimitFailure extends Failure {
   const RateLimitFailure({
-    super.userMessage = 'We are handling a lot of requests right now. '
+    super.userMessage =
+        'We are handling a lot of requests right now. '
         'Please try again shortly.',
     required super.developerMessage,
     this.retryAfter,
@@ -109,7 +112,8 @@ final class RateLimitFailure extends Failure {
 /// These are the ones worth alerting on: they mean a vendor changed a schema.
 final class ContractFailure extends Failure {
   const ContractFailure({
-    super.userMessage = 'We hit an unexpected problem. Our team has been '
+    super.userMessage =
+        'We hit an unexpected problem. Our team has been '
         'notified.',
     required super.developerMessage,
     required this.field,
@@ -125,7 +129,8 @@ final class ContractFailure extends Failure {
 /// response is specific: re-quote and show the new price.
 final class RateChangedFailure extends Failure {
   const RateChangedFailure({
-    super.userMessage = 'The price for this room changed while you were '
+    super.userMessage =
+        'The price for this room changed while you were '
         'booking. Please review the updated rate.',
     required super.developerMessage,
     required this.previousTotalMinor,

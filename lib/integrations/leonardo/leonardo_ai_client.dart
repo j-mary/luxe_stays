@@ -33,12 +33,11 @@ import '../../domain/media.dart';
 /// `cloud.leonardo.ai` is supported only for local experimentation.
 class LeonardoAiClient {
   LeonardoAiClient({
-    required ApiClient client,
-    required AppLogger logger,
+    required this._client,
+    required this._logger,
     this.pollInterval = const Duration(seconds: 2),
     this.pollTimeout = const Duration(seconds: 45),
-  })  : _client = client,
-        _logger = logger;
+  });
 
   final ApiClient _client;
   final AppLogger _logger;
@@ -62,8 +61,8 @@ class LeonardoAiClient {
         'width': width,
         'height': height,
         'num_images': numImages,
-        if (modelId != null) 'modelId': modelId,
-        if (negativePrompt != null) 'negative_prompt': negativePrompt,
+        'modelId': ?modelId,
+        'negative_prompt': ?negativePrompt,
         // Never let a generated asset leak into the public gallery of the
         // vendor's community feed - hotel briefs are commercially sensitive.
         'public': false,
@@ -93,11 +92,11 @@ class LeonardoAiClient {
             JsonRead.stringOrNull(generation, 'status') ?? 'PENDING';
         final List<Map<String, Object?>> images =
             generation['generated_images'] == null
-                ? const <Map<String, Object?>>[]
-                : JsonRead.objectList(
-                    generation['generated_images'],
-                    'generated_images',
-                  );
+            ? const <Map<String, Object?>>[]
+            : JsonRead.objectList(
+                generation['generated_images'],
+                'generated_images',
+              );
         return GenerationState(
           id: generationId,
           status: status,
@@ -119,8 +118,10 @@ class LeonardoAiClient {
     required String destinationId,
     int numImages = 1,
   }) async {
-    final Result<String> submitted =
-        await submitGeneration(prompt: prompt, numImages: numImages);
+    final Result<String> submitted = await submitGeneration(
+      prompt: prompt,
+      numImages: numImages,
+    );
 
     final String? generationId = submitted.valueOrNull;
     if (generationId == null) {
@@ -145,8 +146,10 @@ class LeonardoAiClient {
         );
       }
       if (state.isComplete) {
-        _logger.info('leonardo.ai: generation $generationId complete '
-            '(${state.imageUrls.length} image(s))');
+        _logger.info(
+          'leonardo.ai: generation $generationId complete '
+          '(${state.imageUrls.length} image(s))',
+        );
         return Ok<List<MediaAsset>>(
           state.imageUrls
               .map(
@@ -167,7 +170,8 @@ class LeonardoAiClient {
     _logger.warn('leonardo.ai: generation $generationId timed out');
     return Err<List<MediaAsset>>(
       NetworkFailure(
-        userMessage: 'That is taking longer than expected. Showing our '
+        userMessage:
+            'That is taking longer than expected. Showing our '
             'curated photography instead.',
         developerMessage:
             'leonardo.ai generation $generationId exceeded ${pollTimeout.inSeconds}s',

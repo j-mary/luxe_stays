@@ -19,7 +19,7 @@ import '../../domain/media.dart';
 /// Everything vendor-specific is confined to this file plus
 /// [LeonardoUrlBuilder] - see `docs/05-INTEGRATION-LEONARDO.md`.
 class LeonardoClient {
-  LeonardoClient({required ApiClient client}) : _client = client;
+  LeonardoClient({required this._client});
 
   final ApiClient _client;
 
@@ -33,7 +33,7 @@ class LeonardoClient {
       '/v1/properties/$hotelId/media',
       query: <String, Object?>{
         'limit': limit,
-        if (category != null) 'category': category,
+        'category': ?category,
         // Ask Leonardo for the approved, rights-cleared set only. Shipping an
         // expired-licence image in a booking flow is a legal problem, not a
         // cosmetic one.
@@ -41,9 +41,10 @@ class LeonardoClient {
       },
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        return JsonRead.objectList(root['assets'], 'assets')
-            .map(LeonardoAssetDto.fromJson)
-            .toList(growable: false);
+        return JsonRead.objectList(
+          root['assets'],
+          'assets',
+        ).map(LeonardoAssetDto.fromJson).toList(growable: false);
       },
     );
   }
@@ -61,9 +62,10 @@ class LeonardoClient {
       },
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        return JsonRead.objectList(root['assets'], 'assets')
-            .map(LeonardoAssetDto.fromJson)
-            .toList(growable: false);
+        return JsonRead.objectList(
+          root['assets'],
+          'assets',
+        ).map(LeonardoAssetDto.fromJson).toList(growable: false);
       },
     );
   }
@@ -128,16 +130,16 @@ class LeonardoAssetDto {
       licenceExpiresAt == null || licenceExpiresAt!.isAfter(DateTime.now());
 
   MediaAsset toDomain() => MediaAsset(
-        id: mediaId,
-        baseUrl: deliveryUrl,
-        category: MediaCategory.fromLeonardo(category),
-        altText: caption,
-        credit: credit,
-        width: width,
-        height: height,
-        tags: <String>[...tags, ...roomTypeCodes],
-        isHero: isPrimary,
-      );
+    id: mediaId,
+    baseUrl: deliveryUrl,
+    category: MediaCategory.fromLeonardo(category),
+    altText: caption,
+    credit: credit,
+    width: width,
+    height: height,
+    tags: <String>[...tags, ...roomTypeCodes],
+    isHero: isPrimary,
+  );
 }
 
 /// Turns a canonical Leonardo delivery URL into a resized/re-encoded rendition.
@@ -156,15 +158,17 @@ class LeonardoUrlBuilder {
       return asset.baseUrl;
     }
     final Uri base = Uri.parse(asset.baseUrl);
-    return base.replace(
-      queryParameters: <String, String>{
-        ...base.queryParameters,
-        if (transform.width != null) 'w': transform.width!.toString(),
-        if (transform.height != null) 'h': transform.height!.toString(),
-        'q': transform.quality.toString(),
-        'fmt': transform.format.name,
-        'fit': transform.fit.name,
-      },
-    ).toString();
+    return base
+        .replace(
+          queryParameters: <String, String>{
+            ...base.queryParameters,
+            if (transform.width != null) 'w': transform.width!.toString(),
+            if (transform.height != null) 'h': transform.height!.toString(),
+            'q': transform.quality.toString(),
+            'fmt': transform.format.name,
+            'fit': transform.fit.name,
+          },
+        )
+        .toString();
   }
 }

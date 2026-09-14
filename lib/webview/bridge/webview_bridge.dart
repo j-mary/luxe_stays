@@ -32,13 +32,11 @@ typedef BridgeHandler = void Function(BridgeMessage message);
 ///    a spinner forever.
 class WebViewBridge {
   WebViewBridge({
-    required AppLogger logger,
-    required AnalyticsService analytics,
-    required List<String> allowedOrigins,
+    required this._logger,
+    required this._analytics,
+    required this._allowedOrigins,
     this.readyTimeout = const Duration(seconds: 12),
-  })  : _logger = logger,
-        _analytics = analytics,
-        _allowedOrigins = allowedOrigins;
+  });
 
   final AppLogger _logger;
   final AnalyticsService _analytics;
@@ -128,8 +126,8 @@ class WebViewBridge {
           'theme': isDarkMode ? 'dark' : 'light',
           'platform': 'flutter',
           'safeArea': <String, Object?>{'top': topInset, 'bottom': bottomInset},
-          if (sessionToken != null) 'sessionToken': sessionToken,
-          if (membershipNumber != null) 'membershipNumber': membershipNumber,
+          'sessionToken': ?sessionToken,
+          'membershipNumber': ?membershipNumber,
           ...extra,
         },
       ),
@@ -162,8 +160,10 @@ class WebViewBridge {
 
   Future<void> _handleChannelMessage(String raw) async {
     if (raw.length > _maxMessageBytes) {
-      _logger.warn('webview bridge: dropped oversized message '
-          '(${raw.length} bytes)');
+      _logger.warn(
+        'webview bridge: dropped oversized message '
+        '(${raw.length} bytes)',
+      );
       return;
     }
 
@@ -178,13 +178,17 @@ class WebViewBridge {
       return;
     }
     if (!message.type.isInbound) {
-      _logger.warn('webview bridge: outbound-only type ${message.type.wire} '
-          'received from page - dropped');
+      _logger.warn(
+        'webview bridge: outbound-only type ${message.type.wire} '
+        'received from page - dropped',
+      );
       return;
     }
     if (message.version > BridgeMessage.protocolVersion) {
-      _logger.warn('webview bridge: message protocol v${message.version} is '
-          'newer than this build (v${BridgeMessage.protocolVersion})');
+      _logger.warn(
+        'webview bridge: message protocol v${message.version} is '
+        'newer than this build (v${BridgeMessage.protocolVersion})',
+      );
       // Still dispatched: the fields we know about are, by contract, additive.
     }
 
@@ -212,8 +216,10 @@ class WebViewBridge {
     if (!_readyCompleter.isCompleted) {
       _readyCompleter.complete();
     }
-    _logger.info('webview bridge: handshake complete, flushing '
-        '${_outboundQueue.length} queued message(s)');
+    _logger.info(
+      'webview bridge: handshake complete, flushing '
+      '${_outboundQueue.length} queued message(s)',
+    );
     final List<BridgeMessage> queued = List<BridgeMessage>.from(_outboundQueue);
     _outboundQueue.clear();
     for (final BridgeMessage message in queued) {

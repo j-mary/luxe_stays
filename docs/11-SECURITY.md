@@ -1,3 +1,5 @@
+> Contract audit (2026-09-14): read [15-API-AUDIT.md](15-API-AUDIT.md) first. Vendor-shaped examples below describe the demo gateway, not certified production contracts. Payment/compliance statements are design intentions, not certifications.
+
 # 11 — Security and data protection
 
 A booking app handles card payments, passport-adjacent guest data and a points

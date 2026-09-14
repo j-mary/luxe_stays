@@ -58,11 +58,13 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: 2.3376,
     address: '14 Rue de Rivoli, 75001 Paris',
     headline: 'A courtyard hotel one street from the Tuileries',
-    body: 'Eighteen rooms behind a Haussmannian façade, each with parquet '
+    body:
+        'Eighteen rooms behind a Haussmannian façade, each with parquet '
         'restored from the original 1867 build. The courtyard bar serves until '
         'one, and the concierge holds standing reservations at three of the '
         'four restaurants you were going to ask about.',
-    signature: 'Private after-hours viewing at the Musée de l\'Orangerie, '
+    signature:
+        'Private after-hours viewing at the Musée de l\'Orangerie, '
         'arranged with 48 hours\' notice.',
     amenities: <String>['Spa', 'Bar', 'Concierge', 'Room service', 'Wi-Fi'],
     highlights: <String>[
@@ -85,7 +87,8 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: 2.3622,
     address: '9 Rue de Sévigné, 75004 Paris',
     headline: 'Quiet Marais rooms above a courtyard garden',
-    body: 'A converted hôtel particulier on a street the tour groups have not '
+    body:
+        'A converted hôtel particulier on a street the tour groups have not '
         'found. Breakfast is served in the garden from April, and the top-floor '
         'suites look across the rooftops to Notre-Dame.',
     signature: 'Morning pastry run with the head chef to his own boulangerie.',
@@ -106,10 +109,12 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: 135.7681,
     address: '3-chōme Sanjō, Nakagyō-ku, Kyoto',
     headline: 'Eleven tatami suites and a cedar bath fed by its own spring',
-    body: 'The family has run this house for four generations. Dinner is '
+    body:
+        'The family has run this house for four generations. Dinner is '
         'kaiseki, served in your room, and the garden is lit by hand each '
         'evening at dusk.',
-    signature: 'Dawn tea ceremony in the garden pavilion with the eleventh-'
+    signature:
+        'Dawn tea ceremony in the garden pavilion with the eleventh-'
         'generation host.',
     amenities: <String>['Onsen', 'Kaiseki dining', 'Garden', 'Wi-Fi'],
     highlights: <String>[
@@ -132,7 +137,8 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: -73.9860,
     address: '2 Lexington Ave, New York, NY 10010',
     headline: 'A residents-only park, and a bar that pretends not to exist',
-    body: 'Fifty-two rooms above Gramercy Park, with key access to the park '
+    body:
+        'Fifty-two rooms above Gramercy Park, with key access to the park '
         'itself - one of a handful of hotels that still has it. The library bar '
         'has no sign and no reservations.',
     signature: 'Key access to Gramercy Park, collected at the desk.',
@@ -140,7 +146,7 @@ const List<MockHotel> mockHotels = <MockHotel>[
     highlights: <String>[
       'Gramercy Park key',
       'Library bar',
-      'Suites from 45 m²'
+      'Suites from 45 m²',
     ],
     tags: <String>['city', 'design'],
   ),
@@ -157,7 +163,8 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: 55.1853,
     address: 'Al Sufouh Road, Dubai',
     headline: 'A private beach, and shade engineered to work in August',
-    body: 'Low-rise villas along 400 metres of private beach, with a cooled '
+    body:
+        'Low-rise villas along 400 metres of private beach, with a cooled '
         'colonnade connecting them to the three restaurants. The spa runs a '
         'hammam programme that is worth the trip on its own.',
     signature: 'Sunset dhow charter from the hotel\'s own jetty.',
@@ -178,7 +185,8 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: 18.4166,
     address: 'Wale Street, Bo-Kaap, Cape Town',
     headline: 'Table Mountain from the pool, the harbour from the terrace',
-    body: 'Twenty-two rooms in three restored houses on the slope of Signal '
+    body:
+        'Twenty-two rooms in three restored houses on the slope of Signal '
         'Hill. The kitchen leans Cape Malay, and the sommelier will happily '
         'spend an hour on Swartland wines you have never heard of.',
     signature: 'Guided walk of Bo-Kaap with a fourth-generation resident.',
@@ -186,7 +194,7 @@ const List<MockHotel> mockHotels = <MockHotel>[
     highlights: <String>[
       'Mountain views',
       'Cape Malay kitchen',
-      'Rooftop pool'
+      'Rooftop pool',
     ],
     tags: <String>['city', 'view'],
   ),
@@ -203,7 +211,8 @@ const List<MockHotel> mockHotels = <MockHotel>[
     longitude: 18.3776,
     address: 'Camps Bay, Cape Town',
     headline: 'Twelve Apostles on one side, the Atlantic on the other',
-    body: 'A 1929 manor and four glass pavilions on a ravine above Camps Bay, '
+    body:
+        'A 1929 manor and four glass pavilions on a ravine above Camps Bay, '
         'connected by a suspension bridge over the gorge.',
     signature: 'Helicopter transfer from Cape Town International.',
     amenities: <String>['Pool', 'Spa', 'Restaurant', 'Wi-Fi'],
@@ -433,7 +442,8 @@ const List<MockOffer> mockOffers = <MockOffer>[
   MockOffer(
     id: 'offer-stay-longer',
     title: 'Stay longer, pay less',
-    subtitle: 'Fourth night complimentary at participating properties, '
+    subtitle:
+        'Fourth night complimentary at participating properties, '
         'booked direct.',
     promotionCode: 'STAY4',
     memberOnly: false,
@@ -441,7 +451,8 @@ const List<MockOffer> mockOffers = <MockOffer>[
   MockOffer(
     id: 'offer-suite-upgrade',
     title: 'Suite season',
-    subtitle: 'Guaranteed upgrade to a junior suite on stays of three nights '
+    subtitle:
+        'Guaranteed upgrade to a junior suite on stays of three nights '
         'or more.',
     promotionCode: 'SUITE25',
     memberOnly: false,
@@ -450,7 +461,8 @@ const List<MockOffer> mockOffers = <MockOffer>[
   MockOffer(
     id: 'offer-members-kyoto',
     title: 'Members in Kyoto',
-    subtitle: 'A private tea ceremony and late check-out, for Rewards members '
+    subtitle:
+        'A private tea ceremony and late check-out, for Rewards members '
         'only.',
     promotionCode: 'MEMKYO',
     memberOnly: true,

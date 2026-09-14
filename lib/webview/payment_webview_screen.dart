@@ -11,15 +11,9 @@ import 'hybrid_webview.dart';
 /// The hosted payment page, in a WebView.
 ///
 /// ### Why a WebView here specifically
-/// Because the card fields must never be Flutter widgets. If the app rendered
-/// the PAN input, the handset would be in PCI-DSS scope (SAQ-A-EP or worse) and
-/// every release would need re-assessment. Rendering the PSP's own hosted page
-/// keeps us at SAQ-A: card data goes from the guest's keyboard to the PSP's
-/// origin and never touches our process.
-///
-/// It also gets 3-D Secure / SCA for free. Issuer step-up is a redirect-driven
-/// dance with the bank's own page; a native card form would have to re-host all
-/// of it.
+/// This demo uses a simulated hosted payment page and no real card details.
+/// A real PSP must explicitly support embedded browsers and its authentication
+/// redirects. PCI scope requires assessment; a WebView alone guarantees nothing.
 ///
 /// ### The result path
 /// Two signals arrive, and both are treated as *hints*:
@@ -49,14 +43,16 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(analyticsProvider).event(
-      AnalyticsEvents.paymentWebviewOpened,
-      parameters: <String, Object?>{
-        'intent_id': widget.intent.intentId,
-        'provider': widget.intent.provider,
-        'amount_minor': widget.intent.amount.minorUnits,
-      },
-    );
+    ref
+        .read(analyticsProvider)
+        .event(
+          AnalyticsEvents.paymentWebviewOpened,
+          parameters: <String, Object?>{
+            'intent_id': widget.intent.intentId,
+            'provider': widget.intent.provider,
+            'amount_minor': widget.intent.amount.minorUnits,
+          },
+        );
   }
 
   /// Guards against a double pop: a PSP that both posts a bridge message and
@@ -66,14 +62,16 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
       return;
     }
     _completed = true;
-    ref.read(analyticsProvider).event(
-      AnalyticsEvents.paymentWebviewResult,
-      parameters: <String, Object?>{
-        'intent_id': result.intentId,
-        'status': result.status.name,
-        'three_ds': result.threeDsPerformed,
-      },
-    );
+    ref
+        .read(analyticsProvider)
+        .event(
+          AnalyticsEvents.paymentWebviewResult,
+          parameters: <String, Object?>{
+            'intent_id': result.intentId,
+            'status': result.status.name,
+            'three_ds': result.threeDsPerformed,
+          },
+        );
     Navigator.of(context).pop(result);
   }
 

@@ -13,11 +13,10 @@ import 'cms_models.dart';
 /// surface: if the CRS is down, there is nothing to sell.
 class CmsRepository {
   CmsRepository({
-    required CmsClient client,
-    required AppLogger logger,
+    required this._client,
+    required this._logger,
     this.cacheTtl = const Duration(minutes: 15),
-  })  : _client = client,
-        _logger = logger;
+  });
 
   final CmsClient _client;
   final AppLogger _logger;
@@ -40,7 +39,8 @@ class CmsRepository {
         .where((String id) => !_hotelContentCache.containsKey(id))
         .toList(growable: false);
 
-    final bool cacheFresh = _hotelContentFetchedAt != null &&
+    final bool cacheFresh =
+        _hotelContentFetchedAt != null &&
         DateTime.now().difference(_hotelContentFetchedAt!) < cacheTtl;
 
     if (missing.isEmpty && cacheFresh) {
@@ -95,8 +95,9 @@ class CmsRepository {
       return cached;
     }
 
-    final Result<List<CmsOffer>> result =
-        await _client.offers(memberOnly: memberOnly);
+    final Result<List<CmsOffer>> result = await _client.offers(
+      memberOnly: memberOnly,
+    );
 
     return result.fold<List<CmsOffer>>(
       (List<CmsOffer> offers) {
@@ -114,13 +115,10 @@ class CmsRepository {
   /// Resolves a slug to the URL the WebView should load.
   Future<String?> pageUrl(String slug) async {
     final Result<CmsPage?> result = await _client.page(slug);
-    return result.fold<String?>(
-      (CmsPage? page) => page?.url,
-      (Object failure) {
-        _logger.warn('cms: page "$slug" unavailable', error: failure);
-        return null;
-      },
-    );
+    return result.fold<String?>((CmsPage? page) => page?.url, (Object failure) {
+      _logger.warn('cms: page "$slug" unavailable', error: failure);
+      return null;
+    });
   }
 
   void clearCache() {

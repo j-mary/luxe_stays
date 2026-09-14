@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Vendor contract smoke test.
+# Local demo gateway smoke test. Not a vendor conformance suite.
 #
 # Asserts that every field the Dart clients decode is still present in the
 # responses. Run against the mock server locally, or against the vendors'
@@ -32,7 +32,7 @@ check "hotels" "$HOTELS" Hotels HotelId HotelName City CountryCode Rating
 
 AVAIL=$(curl -sf -X POST "$BASE/synxis/v1/api/availability" \
   -H 'content-type: application/json' \
-  -d '{"ChainId":"12345","HotelIds":["H-PAR-001"],"Stay":{"Arrival":"2026-11-12","Departure":"2026-11-14"},"Occupancy":{"Adults":2,"ChildAges":[],"Rooms":1},"Currency":"EUR"}')
+  -d '{"ChainId":"12345","HotelIds":["H-PAR-001"],"Stay":{"Arrival":"2026-11-12","Departure":"2026-11-14"},"Occupancy":{"Adults":2,"ChildAges":[],"Rooms":1},"Currency":"USD"}')
 check "availability" "$AVAIL" HotelAvailability Offers RatePlanCode NightlyRates TaxesAndFees QuoteToken
 
 echo "Salesforce"
@@ -78,4 +78,4 @@ if [ "$FAILED" -ne 0 ]; then
   exit 1
 fi
 echo
-echo "All vendor contracts OK."
+echo "All local demo contracts OK."

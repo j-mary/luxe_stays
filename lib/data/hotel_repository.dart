@@ -28,15 +28,12 @@ import '../integrations/synxis/synxis_repository.dart';
 /// placeholder is still bookable, and bookable is the point.
 class HotelRepository {
   HotelRepository({
-    required SynxisRepository synxis,
-    required CmsRepository cms,
-    required MediaProvider media,
-    required AppLogger logger,
+    required this._synxis,
+    required this._cms,
+    required this._media,
+    required this._logger,
     this.galleryPrefetchCount = 12,
-  })  : _synxis = synxis,
-        _cms = cms,
-        _media = media,
-        _logger = logger;
+  });
 
   final SynxisRepository _synxis;
   final CmsRepository _cms;
@@ -54,8 +51,9 @@ class HotelRepository {
   }) async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
-    final Result<List<Hotel>> hotelsResult =
-        await _synxis.hotels(query.destination);
+    final Result<List<Hotel>> hotelsResult = await _synxis.hotels(
+      query.destination,
+    );
     final List<Hotel>? hotels = hotelsResult.valueOrNull;
     if (hotels == null) {
       return Err<List<HotelSearchResult>>(hotelsResult.failureOrNull!);
@@ -64,16 +62,17 @@ class HotelRepository {
       return const Ok<List<HotelSearchResult>>(<HotelSearchResult>[]);
     }
 
-    final List<String> hotelIds =
-        hotels.map((Hotel h) => h.id).toList(growable: false);
+    final List<String> hotelIds = hotels
+        .map((Hotel h) => h.id)
+        .toList(growable: false);
 
     final Result<Map<String, List<RoomOffer>>> availabilityResult =
         await _synxis.availability(
-      hotelIds: hotelIds,
-      query: query,
-      membershipNumber: membershipNumber,
-      forceRefresh: forceRefresh,
-    );
+          hotelIds: hotelIds,
+          query: query,
+          membershipNumber: membershipNumber,
+          forceRefresh: forceRefresh,
+        );
     final Map<String, List<RoomOffer>>? offersByHotel =
         availabilityResult.valueOrNull;
     if (offersByHotel == null) {
@@ -82,8 +81,9 @@ class HotelRepository {
 
     // Only enrich what we are actually going to show.
     final List<Hotel> available = hotels
-        .where((Hotel h) =>
-            (offersByHotel[h.id] ?? const <RoomOffer>[]).isNotEmpty)
+        .where(
+          (Hotel h) => (offersByHotel[h.id] ?? const <RoomOffer>[]).isNotEmpty,
+        )
         .toList(growable: false);
 
     final List<String> enrichIds = available
@@ -94,8 +94,9 @@ class HotelRepository {
     // Content and media in parallel; both best-effort.
     final Future<Map<String, CmsHotelContent>> contentFuture = _cms
         .hotelContent(available.map((Hotel h) => h.id).toList(growable: false));
-    final Future<Map<String, List<MediaAsset>>> galleriesFuture =
-        _galleriesFor(enrichIds);
+    final Future<Map<String, List<MediaAsset>>> galleriesFuture = _galleriesFor(
+      enrichIds,
+    );
 
     final Map<String, CmsHotelContent> content = await contentFuture;
     final Map<String, List<MediaAsset>> galleries = await galleriesFuture;
@@ -118,8 +119,10 @@ class HotelRepository {
       );
     }
 
-    final List<HotelSearchResult> filtered =
-        _applyFilters(results, query.filters);
+    final List<HotelSearchResult> filtered = _applyFilters(
+      results,
+      query.filters,
+    );
     _sort(filtered, query.filters.sort);
 
     stopwatch.stop();
@@ -143,8 +146,9 @@ class HotelRepository {
     required SearchQuery query,
     String? membershipNumber,
   }) async {
-    final Result<List<Hotel>> hotelsResult =
-        await _synxis.hotels(query.destination);
+    final Result<List<Hotel>> hotelsResult = await _synxis.hotels(
+      query.destination,
+    );
     final List<Hotel> candidates = hotelsResult.valueOrNull ?? const <Hotel>[];
     Hotel? hotel;
     for (final Hotel candidate in candidates) {
@@ -159,24 +163,27 @@ class HotelRepository {
         hotelsResult.failureOrNull ??
             ClientFailure(
               userMessage: 'We could not find that property.',
-              developerMessage: 'hotel $hotelId not in destination '
+              developerMessage:
+                  'hotel $hotelId not in destination '
                   '${query.destination.id}',
               statusCode: 404,
             ),
       );
     }
 
-    final Result<Map<String, List<RoomOffer>>> availability =
-        await _synxis.availability(
-      hotelIds: <String>[hotelId],
-      query: query,
-      membershipNumber: membershipNumber,
-    );
+    final Result<Map<String, List<RoomOffer>>> availability = await _synxis
+        .availability(
+          hotelIds: <String>[hotelId],
+          query: query,
+          membershipNumber: membershipNumber,
+        );
 
-    final Map<String, CmsHotelContent> content =
-        await _cms.hotelContent(<String>[hotelId]);
-    final Map<String, List<MediaAsset>> galleries =
-        await _galleriesFor(<String>[hotelId]);
+    final Map<String, CmsHotelContent> content = await _cms.hotelContent(
+      <String>[hotelId],
+    );
+    final Map<String, List<MediaAsset>> galleries = await _galleriesFor(
+      <String>[hotelId],
+    );
 
     final CmsHotelContent? cms = content[hotelId];
     return Ok<HotelDetail>(
@@ -198,13 +205,15 @@ class HotelRepository {
     List<String> hotelIds,
   ) async {
     final Map<String, List<MediaAsset>> out = <String, List<MediaAsset>>{};
-    final List<Future<void>> futures = hotelIds.map((String id) async {
-      final Result<List<MediaAsset>> result = await _media.galleryFor(id);
-      final List<MediaAsset>? assets = result.valueOrNull;
-      if (assets != null && assets.isNotEmpty) {
-        out[id] = assets;
-      }
-    }).toList(growable: false);
+    final List<Future<void>> futures = hotelIds
+        .map((String id) async {
+          final Result<List<MediaAsset>> result = await _media.galleryFor(id);
+          final List<MediaAsset>? assets = result.valueOrNull;
+          if (assets != null && assets.isNotEmpty) {
+            out[id] = assets;
+          }
+        })
+        .toList(growable: false);
     await Future.wait(futures);
     return out;
   }
@@ -217,18 +226,21 @@ class HotelRepository {
       return results;
     }
     return results
-        .map((HotelSearchResult r) => r.withOffers(
-              r.offers.where((RoomOffer o) => _offerMatches(o, filters)).toList(
-                    growable: false,
-                  ),
-            ))
+        .map(
+          (HotelSearchResult r) => r.withOffers(
+            r.offers
+                .where((RoomOffer o) => _offerMatches(o, filters))
+                .toList(growable: false),
+          ),
+        )
         .where(
           (HotelSearchResult r) =>
               r.offers.isNotEmpty &&
               r.hotel.starRating >= filters.minStars &&
               (filters.amenities.isEmpty ||
-                  filters.amenities
-                      .every((String a) => r.hotel.amenities.contains(a))),
+                  filters.amenities.every(
+                    (String a) => r.hotel.amenities.contains(a),
+                  )),
         )
         .toList(growable: false);
   }
@@ -255,28 +267,37 @@ class HotelRepository {
   void _sort(List<HotelSearchResult> results, SortOption sort) {
     switch (sort) {
       case SortOption.priceLowToHigh:
-        results.sort((HotelSearchResult a, HotelSearchResult b) =>
-            a.leadInTotalMinor.compareTo(b.leadInTotalMinor));
+        results.sort(
+          (HotelSearchResult a, HotelSearchResult b) =>
+              a.leadInTotalMinor.compareTo(b.leadInTotalMinor),
+        );
         break;
       case SortOption.priceHighToLow:
-        results.sort((HotelSearchResult a, HotelSearchResult b) =>
-            b.leadInTotalMinor.compareTo(a.leadInTotalMinor));
+        results.sort(
+          (HotelSearchResult a, HotelSearchResult b) =>
+              b.leadInTotalMinor.compareTo(a.leadInTotalMinor),
+        );
         break;
       case SortOption.starRating:
-        results.sort((HotelSearchResult a, HotelSearchResult b) =>
-            b.hotel.starRating.compareTo(a.hotel.starRating));
+        results.sort(
+          (HotelSearchResult a, HotelSearchResult b) =>
+              b.hotel.starRating.compareTo(a.hotel.starRating),
+        );
         break;
       case SortOption.guestRating:
-        results.sort((HotelSearchResult a, HotelSearchResult b) =>
-            (b.hotel.guestRating ?? 0).compareTo(a.hotel.guestRating ?? 0));
+        results.sort(
+          (HotelSearchResult a, HotelSearchResult b) =>
+              (b.hotel.guestRating ?? 0).compareTo(a.hotel.guestRating ?? 0),
+        );
         break;
       case SortOption.recommended:
         // "Recommended" is a merchandising decision, not a technical one. Here
         // it is: has editorial content, then star rating, then price - which is
         // a stand-in for whatever the commercial team's real ranking is.
         results.sort((HotelSearchResult a, HotelSearchResult b) {
-          final int contentRank = (b.hotel.editorial != null ? 1 : 0)
-              .compareTo(a.hotel.editorial != null ? 1 : 0);
+          final int contentRank = (b.hotel.editorial != null ? 1 : 0).compareTo(
+            a.hotel.editorial != null ? 1 : 0,
+          );
           if (contentRank != 0) {
             return contentRank;
           }
@@ -311,8 +332,9 @@ class HotelSearchResult {
   int get leadInTotalMinor => leadInOffer?.total.minorUnits ?? 1 << 30;
 
   RoomOffer? get bestMemberOffer {
-    final Iterable<RoomOffer> member =
-        offers.where((RoomOffer o) => o.isMemberRate);
+    final Iterable<RoomOffer> member = offers.where(
+      (RoomOffer o) => o.isMemberRate,
+    );
     if (member.isEmpty) {
       return null;
     }
@@ -346,8 +368,10 @@ class HotelDetail {
       grouped.putIfAbsent(offer.roomType.code, () => <RoomOffer>[]).add(offer);
     }
     for (final List<RoomOffer> list in grouped.values) {
-      list.sort((RoomOffer a, RoomOffer b) =>
-          a.total.minorUnits.compareTo(b.total.minorUnits));
+      list.sort(
+        (RoomOffer a, RoomOffer b) =>
+            a.total.minorUnits.compareTo(b.total.minorUnits),
+      );
     }
     return grouped;
   }

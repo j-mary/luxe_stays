@@ -24,12 +24,10 @@ import 'interceptors/retry_interceptor.dart';
 /// translated by an [ErrorMapper].
 class ApiClient {
   ApiClient({
-    required Dio dio,
-    required ErrorMapper errorMapper,
-    required AppLogger logger,
-  })  : _dio = dio,
-        _errorMapper = errorMapper,
-        _logger = logger;
+    required this._dio,
+    required this._errorMapper,
+    required this._logger,
+  });
 
   /// Builds a configured client. [authInterceptor] is optional: the CMS and
   /// Leonardo read paths use a delivery token pinned in [headers] instead.
@@ -84,7 +82,8 @@ class ApiClient {
 
     return ApiClient(
       dio: dio,
-      errorMapper: errorMapper ??
+      errorMapper:
+          errorMapper ??
           ErrorMapper(
             integration: integration,
             vendorCodeReader: (Object? body) => null,
@@ -135,7 +134,7 @@ class ApiClient {
         queryParameters: query,
         options: Options(
           headers: <String, String>{
-            if (idempotencyKey != null) 'Idempotency-Key': idempotencyKey,
+            'Idempotency-Key': ?idempotencyKey,
             ...?headers,
           },
         ),
@@ -195,11 +194,13 @@ class ApiClient {
         // vendor changed a schema. Surfacing it as its own failure type is what
         // lets us alert on it separately.
         final Failure failure = ContractFailure(
-          developerMessage: 'failed to decode ${response.requestOptions.path}: '
+          developerMessage:
+              'failed to decode ${response.requestOptions.path}: '
               '$e',
           field: '<unknown>',
-          correlationId: response
-              .requestOptions.extra[CorrelationInterceptor.extraKey] as String?,
+          correlationId:
+              response.requestOptions.extra[CorrelationInterceptor.extraKey]
+                  as String?,
           cause: e,
         );
         _logger.error(
@@ -217,8 +218,10 @@ class ApiClient {
   }
 
   void logFailure(Failure failure) {
-    _logger.warn(failure.developerMessage,
-        correlationId: failure.correlationId);
+    _logger.warn(
+      failure.developerMessage,
+      correlationId: failure.correlationId,
+    );
   }
 
   void close() => _dio.close(force: true);
@@ -294,8 +297,11 @@ abstract final class JsonRead {
     return null;
   }
 
-  static bool boolOf(Map<String, Object?> json, String field,
-      {bool fallback = false}) {
+  static bool boolOf(
+    Map<String, Object?> json,
+    String field, {
+    bool fallback = false,
+  }) {
     final Object? value = json[field];
     if (value is bool) return value;
     if (value is String) return value.toLowerCase() == 'true';
@@ -320,18 +326,22 @@ abstract final class JsonRead {
   }
 
   static List<Map<String, Object?>> objectList(Object? json, String field) {
-    return list(json, field)
-        .map((Object? e) => object(e, '$field[]'))
-        .toList(growable: false);
+    return list(
+      json,
+      field,
+    ).map((Object? e) => object(e, '$field[]')).toList(growable: false);
   }
 }
 
 /// Convenience so `AnalyticsService` errors can be reported from any client.
 extension AnalyticsFailureX on AnalyticsService {
   void reportFailure(Failure failure) {
-    event('api_failure', parameters: <String, Object?>{
-      'type': failure.runtimeType.toString(),
-      'correlation_id': failure.correlationId,
-    });
+    event(
+      'api_failure',
+      parameters: <String, Object?>{
+        'type': failure.runtimeType.toString(),
+        'correlation_id': failure.correlationId,
+      },
+    );
   }
 }

@@ -35,16 +35,12 @@ import '../integrations/synxis/synxis_repository.dart';
 ///  * **Price changed between steps 1 and 3** stops the flow and asks the guest.
 class BookingRepository {
   BookingRepository({
-    required SynxisRepository synxis,
-    required PaymentApi payments,
-    required SalesforceRepository salesforce,
-    required AnalyticsService analytics,
-    required AppLogger logger,
-  })  : _synxis = synxis,
-        _payments = payments,
-        _salesforce = salesforce,
-        _analytics = analytics,
-        _logger = logger;
+    required this._synxis,
+    required this._payments,
+    required this._salesforce,
+    required this._analytics,
+    required this._logger,
+  });
 
   final SynxisRepository _synxis;
   final PaymentApi _payments;
@@ -86,8 +82,10 @@ class BookingRepository {
       );
     }
 
-    final Cart prepared =
-        cart.copyWith(items: updated, revision: cart.revision + 1);
+    final Cart prepared = cart.copyWith(
+      items: updated,
+      revision: cart.revision + 1,
+    );
     _logger.info(
       'checkout prepared',
       context: <String, Object?>{
@@ -139,8 +137,9 @@ class BookingRepository {
     LoyaltyMember? member,
   }) async {
     // 3a. Never trust the WebView. Confirm with the PSP, server side.
-    final Result<PaymentResult> verified =
-        await _payments.verifyIntent(bridgeResult.intentId);
+    final Result<PaymentResult> verified = await _payments.verifyIntent(
+      bridgeResult.intentId,
+    );
     final PaymentResult? payment = verified.valueOrNull;
     if (payment == null) {
       return Err<BookingOutcome>(verified.failureOrNull!);
@@ -156,7 +155,8 @@ class BookingRepository {
       );
       return Err<BookingOutcome>(
         PaymentFailure(
-          userMessage: payment.declineReason ??
+          userMessage:
+              payment.declineReason ??
               'Your payment was not completed. No charge has been made.',
           developerMessage:
               'intent ${payment.intentId} status=${payment.status.name}',
@@ -180,26 +180,25 @@ class BookingRepository {
         guest: guest,
         hotelName: item.hotelName,
         paymentIntentId: payment.intentId,
-        idempotencyKey: '${Ids.idempotencyKeyFor(cart.id, cart.revision)}'
+        idempotencyKey:
+            '${Ids.idempotencyKeyFor(cart.id, cart.revision)}'
             '_${item.lineId}',
         membershipNumber: member?.membershipNumber,
         pointsRedeemed: cart.pointsToRedeem,
         voucherCode: cart.appliedVoucher?.code,
       );
-      result.fold<void>(
-        reservations.add,
-        (Failure failure) {
-          failures[item.lineId] = failure.userMessage;
-          _logger.error(
-            'reservation failed for line ${item.lineId}',
-            correlationId: failure.correlationId,
-            error: failure,
-          );
-        },
-      );
+      result.fold<void>(reservations.add, (Failure failure) {
+        failures[item.lineId] = failure.userMessage;
+        _logger.error(
+          'reservation failed for line ${item.lineId}',
+          correlationId: failure.correlationId,
+          error: failure,
+        );
+      });
     }
 
     if (reservations.isEmpty) {
+      final Result<bool> voided = await _payments.voidIntent(payment.intentId);
       // Money was authorised but nothing was booked. The authorisation is
       // voided by the BFF on this signal; the guest is never left paying for
       // nothing.
@@ -209,10 +208,12 @@ class BookingRepository {
       );
       return Err<BookingOutcome>(
         ServerFailure(
-          userMessage: 'We could not confirm your booking and your card has '
-              'not been charged. Please try again.',
-          developerMessage: 'no reservations created for cart ${cart.id}; '
-              'void requested for intent ${payment.intentId}',
+          userMessage: voided.valueOrNull == true
+              ? 'We could not confirm your booking. The demo authorization was cancelled.'
+              : 'We could not confirm your booking or cancel the authorization. Contact support before retrying.',
+          developerMessage:
+              'no reservations created for cart ${cart.id}; '
+              'void succeeded=${voided.valueOrNull == true} for intent ${payment.intentId}',
           statusCode: 502,
         ),
       );
@@ -258,11 +259,14 @@ class BookingRepository {
   /// Points are earned on room revenue, not on tax and fees. Getting this
   /// wrong is the loyalty bug that generates the most support contacts.
   Money _eligibleSpend(
-      List<Reservation> reservations, LoyaltyProgramRules rules) {
+    List<Reservation> reservations,
+    LoyaltyProgramRules rules,
+  ) {
     final String currency = reservations.first.total.currency;
     Money eligible = Money.zero(currency);
     for (final Reservation reservation in reservations) {
-      eligible = eligible +
+      eligible =
+          eligible +
           (rules.taxesEarnPoints
               ? reservation.offer.total
               : reservation.offer.roomSubtotal);

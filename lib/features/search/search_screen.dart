@@ -116,9 +116,7 @@ class SearchScreen extends ConsumerWidget {
               ),
             ),
             if (session.isSignedIn)
-              SliverToBoxAdapter(
-                child: _MemberBanner(session: session),
-              ),
+              SliverToBoxAdapter(child: _MemberBanner(session: session)),
             const SliverToBoxAdapter(child: OffersStrip()),
             ...state.results.when<List<Widget>>(
               loading: () => <Widget>[
@@ -161,7 +159,8 @@ class SearchScreen extends ConsumerWidget {
                 return <Widget>[
                   SliverToBoxAdapter(
                     child: SectionHeading(
-                      label: '${results.length} PROPERT'
+                      label:
+                          '${results.length} PROPERT'
                           '${results.length == 1 ? 'Y' : 'IES'} AVAILABLE',
                       padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
                     ),
@@ -180,10 +179,9 @@ class SearchScreen extends ConsumerWidget {
                           ),
                         ),
                         onQuickAdd: (RoomOffer offer) {
-                          ref.read(cartProvider.notifier).add(
-                                hotel: result.hotel,
-                                offer: offer,
-                              );
+                          ref
+                              .read(cartProvider.notifier)
+                              .add(hotel: result.hotel, offer: offer);
                           showAppSnackBar(
                             context,
                             '${result.hotel.name} added',
@@ -220,9 +218,7 @@ class _MemberBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(13, 11, 14, 11),
         decoration: BoxDecoration(
-          border: Border(
-            left: BorderSide(color: colors.secondary, width: 2),
-          ),
+          border: Border(left: BorderSide(color: colors.secondary, width: 2)),
         ),
         child: Row(
           children: <Widget>[
@@ -237,8 +233,9 @@ class _MemberBanner extends StatelessWidget {
                 '${session.tier.label.toUpperCase()} · '
                 '${session.tier.memberRateDiscountPercent.toStringAsFixed(0)}% '
                 'MEMBER RATES APPLIED',
-                style: theme.textTheme.labelSmall
-                    ?.copyWith(color: colors.onSurface),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colors.onSurface,
+                ),
               ),
             ),
           ],

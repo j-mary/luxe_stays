@@ -17,17 +17,14 @@ class SearchQuery {
   });
 
   factory SearchQuery.initial() => SearchQuery(
-        destination: const Destination(
-          id: 'any',
-          label: 'Anywhere',
-          type: DestinationType.anywhere,
-        ),
-        stay: DateRange.nightsFrom(
-          DateTime.now().addDays(21),
-          2,
-        ),
-        occupancy: const Occupancy(),
-      );
+    destination: const Destination(
+      id: 'any',
+      label: 'Anywhere',
+      type: DestinationType.anywhere,
+    ),
+    stay: DateRange.nightsFrom(DateTime.now().addDays(21), 2),
+    occupancy: const Occupancy(),
+  );
 
   final Destination destination;
   final DateRange stay;
@@ -64,15 +61,15 @@ class SearchQuery {
   /// Stable cache key. Includes the filters because SynXis prices per
   /// rate-plan set, and excludes nothing that changes the price.
   String get cacheKey => <String>[
-        destination.id,
-        stay.checkIn.iso8601Date,
-        stay.checkOut.iso8601Date,
-        '${occupancy.adults}a${occupancy.children.length}c${occupancy.rooms}r',
-        currency,
-        promotionCode ?? '-',
-        corporateCode ?? '-',
-        filters.cacheKey,
-      ].join('|');
+    destination.id,
+    stay.checkIn.iso8601Date,
+    stay.checkOut.iso8601Date,
+    '${occupancy.adults}a${occupancy.children.join(',')}c${occupancy.rooms}r',
+    currency,
+    promotionCode ?? '-',
+    corporateCode ?? '-',
+    filters.cacheKey,
+  ].join('|');
 }
 
 enum DestinationType { anywhere, city, country, region, property, landmark }
@@ -112,8 +109,9 @@ class Occupancy {
   int get totalGuests => adults + children.length;
 
   String get label {
-    final StringBuffer b =
-        StringBuffer('$adults adult${adults == 1 ? '' : 's'}');
+    final StringBuffer b = StringBuffer(
+      '$adults adult${adults == 1 ? '' : 's'}',
+    );
     if (children.isNotEmpty) {
       b.write(', ${children.length} child${children.length == 1 ? '' : 'ren'}');
     }
@@ -191,14 +189,14 @@ class SearchFilters {
   }
 
   String get cacheKey => <String>[
-        's$minStars',
-        'p${maxNightlyRateMinor ?? '-'}',
-        'a${(amenities.toList()..sort()).join(',')}',
-        'm${(mealPlans.map((MealPlan p) => p.name).toList()..sort()).join(',')}',
-        freeCancellationOnly ? 'fc' : '-',
-        memberRatesOnly ? 'mr' : '-',
-        sort.name,
-      ].join('/');
+    's$minStars',
+    'p${maxNightlyRateMinor ?? '-'}',
+    'a${(amenities.toList()..sort()).join(',')}',
+    'm${(mealPlans.map((MealPlan p) => p.name).toList()..sort()).join(',')}',
+    freeCancellationOnly ? 'fc' : '-',
+    memberRatesOnly ? 'mr' : '-',
+    sort.name,
+  ].join('/');
 }
 
 enum SortOption {
@@ -209,12 +207,12 @@ enum SortOption {
   starRating;
 
   String get label => switch (this) {
-        SortOption.recommended => 'Recommended',
-        SortOption.priceLowToHigh => 'Price: low to high',
-        SortOption.priceHighToLow => 'Price: high to low',
-        SortOption.guestRating => 'Guest rating',
-        SortOption.starRating => 'Star rating',
-      };
+    SortOption.recommended => 'Recommended',
+    SortOption.priceLowToHigh => 'Price: low to high',
+    SortOption.priceHighToLow => 'Price: high to low',
+    SortOption.guestRating => 'Guest rating',
+    SortOption.starRating => 'Star rating',
+  };
 }
 
 enum MealPlan {
@@ -225,19 +223,19 @@ enum MealPlan {
   allInclusive;
 
   String get label => switch (this) {
-        MealPlan.roomOnly => 'Room only',
-        MealPlan.breakfast => 'Breakfast included',
-        MealPlan.halfBoard => 'Half board',
-        MealPlan.fullBoard => 'Full board',
-        MealPlan.allInclusive => 'All inclusive',
-      };
+    MealPlan.roomOnly => 'Room only',
+    MealPlan.breakfast => 'Breakfast included',
+    MealPlan.halfBoard => 'Half board',
+    MealPlan.fullBoard => 'Full board',
+    MealPlan.allInclusive => 'All inclusive',
+  };
 
   /// SynXis sends OTA-style meal-plan codes on the rate plan.
   static MealPlan fromCode(String? code) => switch (code?.toUpperCase()) {
-        'BB' || 'BREAKFAST' => MealPlan.breakfast,
-        'HB' || 'HALFBOARD' => MealPlan.halfBoard,
-        'FB' || 'FULLBOARD' => MealPlan.fullBoard,
-        'AI' || 'ALLINCLUSIVE' => MealPlan.allInclusive,
-        _ => MealPlan.roomOnly,
-      };
+    'BB' || 'BREAKFAST' => MealPlan.breakfast,
+    'HB' || 'HALFBOARD' => MealPlan.halfBoard,
+    'FB' || 'FULLBOARD' => MealPlan.fullBoard,
+    'AI' || 'ALLINCLUSIVE' => MealPlan.allInclusive,
+    _ => MealPlan.roomOnly,
+  };
 }

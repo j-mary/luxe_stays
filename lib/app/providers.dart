@@ -52,18 +52,19 @@ final Provider<AppLogger> loggerProvider = Provider<AppLogger>((Ref ref) {
   );
 });
 
-final Provider<AnalyticsService> analyticsProvider =
-    Provider<AnalyticsService>((Ref ref) {
-  // Swap for a FirebaseAnalytics adapter here; nothing else changes.
-  return LoggingAnalyticsService(ref.watch(loggerProvider));
-});
+final Provider<AnalyticsService> analyticsProvider = Provider<AnalyticsService>(
+  (Ref ref) {
+    // Swap for a FirebaseAnalytics adapter here; nothing else changes.
+    return LoggingAnalyticsService(ref.watch(loggerProvider));
+  },
+);
 
 final Provider<TokenStore> tokenStoreProvider = Provider<TokenStore>((Ref ref) {
   return SecureTokenStore();
 });
 
-final Provider<LoyaltyProgramRules> loyaltyRulesProvider =
-    Provider<LoyaltyProgramRules>((Ref ref) {
+final Provider<LoyaltyProgramRules>
+loyaltyRulesProvider = Provider<LoyaltyProgramRules>((Ref ref) {
   // In production these come from a remote config / the CMS so the programme
   // can change earn rates without an app release.
   return const LoyaltyProgramRules();
@@ -75,21 +76,22 @@ final Provider<LoyaltyProgramRules> loyaltyRulesProvider =
 
 final Provider<SalesforceAuthService> salesforceAuthProvider =
     Provider<SalesforceAuthService>((Ref ref) {
-  final AppConfig config = ref.watch(appConfigProvider);
-  return SalesforceAuthService(
-    // A bare Dio: the auth service must not go through AuthInterceptor, or
-    // refreshing a token would require a token.
-    dio: Dio(BaseOptions(connectTimeout: const Duration(seconds: 10))),
-    store: ref.watch(tokenStoreProvider),
-    logger: ref.watch(loggerProvider),
-    clientId: config.salesforceClientId,
-    redirectUri: 'luxestays://oauth/callback',
-    loginBaseUrl: config.salesforceBaseUrl,
-  );
-});
+      final AppConfig config = ref.watch(appConfigProvider);
+      return SalesforceAuthService(
+        // A bare Dio: the auth service must not go through AuthInterceptor, or
+        // refreshing a token would require a token.
+        dio: Dio(BaseOptions(connectTimeout: const Duration(seconds: 10))),
+        store: ref.watch(tokenStoreProvider),
+        logger: ref.watch(loggerProvider),
+        clientId: config.salesforceClientId,
+        redirectUri: 'luxestays://oauth/callback',
+        loginBaseUrl: config.salesforceBaseUrl,
+      );
+    });
 
-final Provider<ApiClient> salesforceClientProvider =
-    Provider<ApiClient>((Ref ref) {
+final Provider<ApiClient> salesforceClientProvider = Provider<ApiClient>((
+  Ref ref,
+) {
   final AppConfig config = ref.watch(appConfigProvider);
   final AppLogger logger = ref.watch(loggerProvider);
   final SalesforceAuthService auth = ref.watch(salesforceAuthProvider);
@@ -111,8 +113,9 @@ final Provider<ApiClient> salesforceClientProvider =
   return client;
 });
 
-final Provider<SalesforceApi> salesforceApiProvider =
-    Provider<SalesforceApi>((Ref ref) {
+final Provider<SalesforceApi> salesforceApiProvider = Provider<SalesforceApi>((
+  Ref ref,
+) {
   final AppConfig config = ref.watch(appConfigProvider);
   return SalesforceApi(
     client: ref.watch(salesforceClientProvider),
@@ -123,12 +126,12 @@ final Provider<SalesforceApi> salesforceApiProvider =
 
 final Provider<SalesforceRepository> salesforceRepositoryProvider =
     Provider<SalesforceRepository>((Ref ref) {
-  return SalesforceRepository(
-    api: ref.watch(salesforceApiProvider),
-    logger: ref.watch(loggerProvider),
-    rules: ref.watch(loyaltyRulesProvider),
-  );
-});
+      return SalesforceRepository(
+        api: ref.watch(salesforceApiProvider),
+        logger: ref.watch(loggerProvider),
+        rules: ref.watch(loyaltyRulesProvider),
+      );
+    });
 
 // ---------------------------------------------------------------------------
 // SynXis
@@ -163,20 +166,20 @@ final Provider<SynxisApi> synxisApiProvider = Provider<SynxisApi>((Ref ref) {
 
 final Provider<SynxisRepository> synxisRepositoryProvider =
     Provider<SynxisRepository>((Ref ref) {
-  return SynxisRepository(
-    api: ref.watch(synxisApiProvider),
-    logger: ref.watch(loggerProvider),
-  );
-});
+      return SynxisRepository(
+        api: ref.watch(synxisApiProvider),
+        logger: ref.watch(loggerProvider),
+      );
+    });
 
 final Provider<SynxisBookingEngine> bookingEngineProvider =
     Provider<SynxisBookingEngine>((Ref ref) {
-  final AppConfig config = ref.watch(appConfigProvider);
-  return SynxisBookingEngine(
-    baseUrl: config.synxisBookingEngineUrl,
-    chainId: config.synxisChainId,
-  );
-});
+      final AppConfig config = ref.watch(appConfigProvider);
+      return SynxisBookingEngine(
+        baseUrl: config.synxisBookingEngineUrl,
+        chainId: config.synxisChainId,
+      );
+    });
 
 // ---------------------------------------------------------------------------
 // CMS
@@ -202,8 +205,9 @@ final Provider<ApiClient> cmsClientProvider = Provider<ApiClient>((Ref ref) {
   return client;
 });
 
-final Provider<CmsRepository> cmsRepositoryProvider =
-    Provider<CmsRepository>((Ref ref) {
+final Provider<CmsRepository> cmsRepositoryProvider = Provider<CmsRepository>((
+  Ref ref,
+) {
   final AppConfig config = ref.watch(appConfigProvider);
   return CmsRepository(
     client: CmsClient(
@@ -219,8 +223,9 @@ final Provider<CmsRepository> cmsRepositoryProvider =
 // Leonardo
 // ---------------------------------------------------------------------------
 
-final Provider<MediaProvider> mediaProviderProvider =
-    Provider<MediaProvider>((Ref ref) {
+final Provider<MediaProvider> mediaProviderProvider = Provider<MediaProvider>((
+  Ref ref,
+) {
   final AppConfig config = ref.watch(appConfigProvider);
   final AppLogger logger = ref.watch(loggerProvider);
 
@@ -280,21 +285,21 @@ final Provider<PaymentApi> paymentApiProvider = Provider<PaymentApi>((Ref ref) {
 
 final Provider<HotelRepository> hotelRepositoryProvider =
     Provider<HotelRepository>((Ref ref) {
-  return HotelRepository(
-    synxis: ref.watch(synxisRepositoryProvider),
-    cms: ref.watch(cmsRepositoryProvider),
-    media: ref.watch(mediaProviderProvider),
-    logger: ref.watch(loggerProvider),
-  );
-});
+      return HotelRepository(
+        synxis: ref.watch(synxisRepositoryProvider),
+        cms: ref.watch(cmsRepositoryProvider),
+        media: ref.watch(mediaProviderProvider),
+        logger: ref.watch(loggerProvider),
+      );
+    });
 
 final Provider<BookingRepository> bookingRepositoryProvider =
     Provider<BookingRepository>((Ref ref) {
-  return BookingRepository(
-    synxis: ref.watch(synxisRepositoryProvider),
-    payments: ref.watch(paymentApiProvider),
-    salesforce: ref.watch(salesforceRepositoryProvider),
-    analytics: ref.watch(analyticsProvider),
-    logger: ref.watch(loggerProvider),
-  );
-});
+      return BookingRepository(
+        synxis: ref.watch(synxisRepositoryProvider),
+        payments: ref.watch(paymentApiProvider),
+        salesforce: ref.watch(salesforceRepositoryProvider),
+        analytics: ref.watch(analyticsProvider),
+        logger: ref.watch(loggerProvider),
+      );
+    });

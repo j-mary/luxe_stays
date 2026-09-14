@@ -18,12 +18,10 @@ import 'salesforce_models.dart';
 /// a cosmetic one.
 class SalesforceRepository {
   SalesforceRepository({
-    required SalesforceApi api,
-    required AppLogger logger,
-    LoyaltyProgramRules rules = const LoyaltyProgramRules(),
-  })  : _api = api,
-        _logger = logger,
-        _rules = rules;
+    required this._api,
+    required this._logger,
+    this._rules = const LoyaltyProgramRules(),
+  });
 
   final SalesforceApi _api;
   final AppLogger _logger;
@@ -45,49 +43,51 @@ class SalesforceRepository {
   /// loyalty screen that renders a balance with an empty history is far better
   /// than one that renders an error because a secondary call timed out.
   Future<Result<LoyaltyMemberView>> memberView(String membershipNumber) async {
-    final Result<SalesforceMemberDto> memberResult =
-        await _api.memberByNumber(membershipNumber);
-
-    return memberResult.fold<Future<Result<LoyaltyMemberView>>>(
-      (SalesforceMemberDto dto) async {
-        // Fired together, awaited separately: two round trips in the time of
-        // one, without losing the static types that Future.wait would erase.
-        final Future<Result<List<SalesforceVoucherDto>>> voucherFuture =
-            _api.vouchers(dto.memberId);
-        final Future<Result<List<SalesforceLedgerEntryDto>>> ledgerFuture =
-            _api.ledger(dto.memberId);
-        final Result<List<SalesforceVoucherDto>> voucherResult =
-            await voucherFuture;
-        final Result<List<SalesforceLedgerEntryDto>> ledgerResult =
-            await ledgerFuture;
-
-        final List<LoyaltyVoucher> vouchers = voucherResult.valueOrNull
-                ?.map((SalesforceVoucherDto v) => v.toDomain())
-                .toList(growable: false) ??
-            const <LoyaltyVoucher>[];
-        final List<PointsLedgerEntry> ledger = ledgerResult.valueOrNull
-                ?.map((SalesforceLedgerEntryDto e) => e.toDomain())
-                .toList(growable: false) ??
-            const <PointsLedgerEntry>[];
-
-        if (voucherResult.failureOrNull != null) {
-          _logger.warn(
-            'salesforce: vouchers unavailable, degrading gracefully',
-            correlationId: voucherResult.failureOrNull?.correlationId,
-          );
-        }
-
-        return Ok<LoyaltyMemberView>(
-          LoyaltyMemberView(
-            member: dto.toDomain(vouchers: vouchers),
-            ledger: ledger,
-            ledgerAvailable: ledgerResult.isOk,
-            vouchersAvailable: voucherResult.isOk,
-          ),
-        );
-      },
-      (Failure failure) async => Err<LoyaltyMemberView>(failure),
+    final Result<SalesforceMemberDto> memberResult = await _api.memberByNumber(
+      membershipNumber,
     );
+
+    return memberResult.fold<Future<Result<LoyaltyMemberView>>>((
+      SalesforceMemberDto dto,
+    ) async {
+      // Fired together, awaited separately: two round trips in the time of
+      // one, without losing the static types that Future.wait would erase.
+      final Future<Result<List<SalesforceVoucherDto>>> voucherFuture = _api
+          .vouchers(dto.memberId);
+      final Future<Result<List<SalesforceLedgerEntryDto>>> ledgerFuture = _api
+          .ledger(dto.memberId);
+      final Result<List<SalesforceVoucherDto>> voucherResult =
+          await voucherFuture;
+      final Result<List<SalesforceLedgerEntryDto>> ledgerResult =
+          await ledgerFuture;
+
+      final List<LoyaltyVoucher> vouchers =
+          voucherResult.valueOrNull
+              ?.map((SalesforceVoucherDto v) => v.toDomain())
+              .toList(growable: false) ??
+          const <LoyaltyVoucher>[];
+      final List<PointsLedgerEntry> ledger =
+          ledgerResult.valueOrNull
+              ?.map((SalesforceLedgerEntryDto e) => e.toDomain())
+              .toList(growable: false) ??
+          const <PointsLedgerEntry>[];
+
+      if (voucherResult.failureOrNull != null) {
+        _logger.warn(
+          'salesforce: vouchers unavailable, degrading gracefully',
+          correlationId: voucherResult.failureOrNull?.correlationId,
+        );
+      }
+
+      return Ok<LoyaltyMemberView>(
+        LoyaltyMemberView(
+          member: dto.toDomain(vouchers: vouchers),
+          ledger: ledger,
+          ledgerAvailable: ledgerResult.isOk,
+          vouchersAvailable: voucherResult.isOk,
+        ),
+      );
+    }, (Failure failure) async => Err<LoyaltyMemberView>(failure));
   }
 
   /// Posts points for a completed reservation. Never throws.
@@ -161,8 +161,9 @@ class SalesforceRepository {
     if (_deferredAccruals.isEmpty) {
       return 0;
     }
-    final List<DeferredAccrual> pending =
-        List<DeferredAccrual>.from(_deferredAccruals);
+    final List<DeferredAccrual> pending = List<DeferredAccrual>.from(
+      _deferredAccruals,
+    );
     int posted = 0;
     for (final DeferredAccrual accrual in pending) {
       final Result<SalesforceProcessResult> result = await _api.accrue(
@@ -176,8 +177,10 @@ class SalesforceRepository {
         posted++;
       }
     }
-    _logger.info('salesforce: drained $posted deferred accrual(s), '
-        '${_deferredAccruals.length} remaining');
+    _logger.info(
+      'salesforce: drained $posted deferred accrual(s), '
+      '${_deferredAccruals.length} remaining',
+    );
     return posted;
   }
 
@@ -191,7 +194,8 @@ class SalesforceRepository {
     if (points < _rules.minimumRedemption) {
       return Err<LoyaltyVoucher>(
         ClientFailure(
-          userMessage: 'You need at least '
+          userMessage:
+              'You need at least '
               '${_rules.minimumRedemption} points to redeem.',
           developerMessage: 'redeem below minimum: $points',
           statusCode: 422,
@@ -207,24 +211,24 @@ class SalesforceRepository {
       idempotencyKey: 'redeem_${cartId}_$points',
     );
 
-    return result.fold<Result<LoyaltyVoucher>>(
-      (SalesforceProcessResult process) {
-        final SalesforceVoucherDto? voucher = process.voucher;
-        if (!process.isSuccess || voucher == null) {
-          return Err<LoyaltyVoucher>(
-            ServerFailure(
-              userMessage: 'We could not redeem your points right now. '
-                  'Your balance has not changed.',
-              developerMessage:
-                  'redeem returned ${process.status}: ${process.message}',
-              statusCode: 200,
-            ),
-          );
-        }
-        return Ok<LoyaltyVoucher>(voucher.toDomain());
-      },
-      Err<LoyaltyVoucher>.new,
-    );
+    return result.fold<Result<LoyaltyVoucher>>((
+      SalesforceProcessResult process,
+    ) {
+      final SalesforceVoucherDto? voucher = process.voucher;
+      if (!process.isSuccess || voucher == null) {
+        return Err<LoyaltyVoucher>(
+          ServerFailure(
+            userMessage:
+                'We could not redeem your points right now. '
+                'Your balance has not changed.',
+            developerMessage:
+                'redeem returned ${process.status}: ${process.message}',
+            statusCode: 200,
+          ),
+        );
+      }
+      return Ok<LoyaltyVoucher>(voucher.toDomain());
+    }, Err<LoyaltyVoucher>.new);
   }
 
   Future<Result<String>> raiseSupportCase({
@@ -288,13 +292,12 @@ class AccrualOutcome {
     required int points,
     int? newBalance,
     String? journalId,
-  }) =>
-      AccrualOutcome._(
-        isPosted: true,
-        points: points,
-        newBalance: newBalance,
-        journalId: journalId,
-      );
+  }) => AccrualOutcome._(
+    isPosted: true,
+    points: points,
+    newBalance: newBalance,
+    journalId: journalId,
+  );
 
   /// Salesforce was unreachable. [points] is our local *estimate*, clearly
   /// labelled as such in the UI ("~4,500 points pending").

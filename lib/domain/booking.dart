@@ -40,8 +40,9 @@ class GuestDetails {
       _emailPattern.hasMatch(email.trim()) &&
       phone.trim().length >= 6;
 
-  static final RegExp _emailPattern =
-      RegExp(r'^[\w.!#$%&*+/=?^`{|}~-]+@[\w-]+(\.[\w-]+)+$');
+  static final RegExp _emailPattern = RegExp(
+    r'^[\w.!#$%&*+/=?^`{|}~-]+@[\w-]+(\.[\w-]+)+$',
+  );
 
   GuestDetails copyWith({
     String? firstName,
@@ -195,12 +196,12 @@ enum ReservationStatus {
   noShow;
 
   String get label => switch (this) {
-        ReservationStatus.confirmed => 'Confirmed',
-        ReservationStatus.pending => 'Pending',
-        ReservationStatus.cancelled => 'Cancelled',
-        ReservationStatus.modified => 'Modified',
-        ReservationStatus.noShow => 'No show',
-      };
+    ReservationStatus.confirmed => 'Confirmed',
+    ReservationStatus.pending => 'Pending',
+    ReservationStatus.cancelled => 'Cancelled',
+    ReservationStatus.modified => 'Modified',
+    ReservationStatus.noShow => 'No show',
+  };
 }
 
 /// The outcome of the whole checkout orchestration - one reservation per cart

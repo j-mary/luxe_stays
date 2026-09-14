@@ -84,8 +84,10 @@ void main() {
         ),
       );
       expect(failure, isA<RateLimitFailure>());
-      expect((failure as RateLimitFailure).retryAfter,
-          const Duration(seconds: 12));
+      expect(
+        (failure as RateLimitFailure).retryAfter,
+        const Duration(seconds: 12),
+      );
     });
 
     test('timeouts become NetworkFailure', () {

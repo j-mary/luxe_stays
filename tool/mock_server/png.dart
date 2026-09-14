@@ -36,30 +36,32 @@ Uint8List gradientPng({
       final double t = (fx * 0.55 + fy * 0.45);
       final double vignette =
           1 - 0.18 * (((fx - 0.5) * (fx - 0.5) + (fy - 0.5) * (fy - 0.5)) * 2);
-      raw[p++] =
-          ((a[0] + (b[0] - a[0]) * t) * vignette).round().clamp(0, 255).toInt();
-      raw[p++] =
-          ((a[1] + (b[1] - a[1]) * t) * vignette).round().clamp(0, 255).toInt();
-      raw[p++] =
-          ((a[2] + (b[2] - a[2]) * t) * vignette).round().clamp(0, 255).toInt();
+      raw[p++] = ((a[0] + (b[0] - a[0]) * t) * vignette)
+          .round()
+          .clamp(0, 255)
+          .toInt();
+      raw[p++] = ((a[1] + (b[1] - a[1]) * t) * vignette)
+          .round()
+          .clamp(0, 255)
+          .toInt();
+      raw[p++] = ((a[2] + (b[2] - a[2]) * t) * vignette)
+          .round()
+          .clamp(0, 255)
+          .toInt();
     }
   }
 
   final BytesBuilder out = BytesBuilder();
   out.add(<int>[137, 80, 78, 71, 13, 10, 26, 10]);
-  _chunk(
-    out,
-    'IHDR',
-    <int>[
-      ..._be32(w),
-      ..._be32(h),
-      8, // bit depth
-      2, // colour type: truecolour
-      0, // compression
-      0, // filter
-      0, // interlace
-    ],
-  );
+  _chunk(out, 'IHDR', <int>[
+    ..._be32(w),
+    ..._be32(h),
+    8, // bit depth
+    2, // colour type: truecolour
+    0, // compression
+    0, // filter
+    0, // interlace
+  ]);
   _chunk(out, 'IDAT', zlib.encode(raw));
   _chunk(out, 'IEND', const <int>[]);
   return out.takeBytes();
@@ -73,11 +75,11 @@ void _chunk(BytesBuilder out, String type, List<int> data) {
 }
 
 List<int> _be32(int value) => <int>[
-      (value >> 24) & 0xFF,
-      (value >> 16) & 0xFF,
-      (value >> 8) & 0xFF,
-      value & 0xFF,
-    ];
+  (value >> 24) & 0xFF,
+  (value >> 16) & 0xFF,
+  (value >> 8) & 0xFF,
+  value & 0xFF,
+];
 
 List<int>? _crcTable;
 

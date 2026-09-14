@@ -15,15 +15,12 @@ import 'media_provider.dart';
 /// identical round trips.
 class LeonardoMediaProvider implements MediaProvider {
   LeonardoMediaProvider({
-    required LeonardoClient client,
-    required AppLogger logger,
-    LeonardoAiClient? aiClient,
-    LeonardoUrlBuilder urlBuilder = const LeonardoUrlBuilder(),
+    required this._client,
+    required this._logger,
+    this._aiClient,
+    this._urlBuilder = const LeonardoUrlBuilder(),
     this.cacheTtl = const Duration(minutes: 30),
-  })  : _client = client,
-        _logger = logger,
-        _aiClient = aiClient,
-        _urlBuilder = urlBuilder;
+  });
 
   final LeonardoClient _client;
   final LeonardoAiClient? _aiClient;
@@ -57,8 +54,9 @@ class LeonardoMediaProvider implements MediaProvider {
   }
 
   Future<Result<List<MediaAsset>>> _fetchGallery(String hotelId) async {
-    final Result<List<LeonardoAssetDto>> result =
-        await _client.propertyMedia(hotelId);
+    final Result<List<LeonardoAssetDto>> result = await _client.propertyMedia(
+      hotelId,
+    );
 
     return result.map((List<LeonardoAssetDto> dtos) {
       final List<MediaAsset> assets = dtos
@@ -80,8 +78,10 @@ class LeonardoMediaProvider implements MediaProvider {
         }
         return a.category.index.compareTo(b.category.index);
       });
-      _galleryCache[hotelId] =
-          _CachedGallery(assets: assets, at: DateTime.now());
+      _galleryCache[hotelId] = _CachedGallery(
+        assets: assets,
+        at: DateTime.now(),
+      );
       return assets;
     });
   }

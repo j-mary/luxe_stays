@@ -147,8 +147,9 @@ class _CartLine extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: Text(
                 item.total.format(),
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -168,17 +169,17 @@ class _StatusChip extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final (String label, Color color) = switch (item.status) {
       CartLineStatus.priceChanged => (
-          item.repriceMessage ?? 'Price changed',
-          theme.colorScheme.error
-        ),
+        item.repriceMessage ?? 'Price changed',
+        theme.colorScheme.error,
+      ),
       CartLineStatus.soldOut => (
-          'No longer available',
-          theme.colorScheme.error
-        ),
+        'No longer available',
+        theme.colorScheme.error,
+      ),
       CartLineStatus.repricing => (
-          'Checking price…',
-          theme.colorScheme.outline
-        ),
+        'Checking price…',
+        theme.colorScheme.outline,
+      ),
       CartLineStatus.booked => ('Booked', theme.colorScheme.primary),
       CartLineStatus.failed => ('Could not book', theme.colorScheme.error),
       CartLineStatus.ready => ('', theme.colorScheme.outline),
@@ -211,8 +212,9 @@ class _SignInPrompt extends ConsumerWidget {
       child: ListTile(
         leading: const Icon(Icons.workspace_premium_rounded),
         title: const Text('Sign in to use your points'),
-        subtitle:
-            const Text('Members earn on every stay and unlock lower rates'),
+        subtitle: const Text(
+          'Members earn on every stay and unlock lower rates',
+        ),
         trailing: const Icon(Icons.chevron_right_rounded),
         onTap: () => Navigator.of(context).pushNamed(Routes.loyalty),
       ),
@@ -235,8 +237,9 @@ class _LoyaltyPanelState extends ConsumerState<_LoyaltyPanel> {
 
   Future<void> _redeem(int points) async {
     setState(() => _redeeming = true);
-    final Result<LoyaltyVoucher> result =
-        await ref.read(cartProvider.notifier).redeemPointsForVoucher(points);
+    final Result<LoyaltyVoucher> result = await ref
+        .read(cartProvider.notifier)
+        .redeemPointsForVoucher(points);
     if (!mounted) {
       return;
     }
@@ -268,8 +271,10 @@ class _LoyaltyPanelState extends ConsumerState<_LoyaltyPanel> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(Icons.workspace_premium_rounded,
-                    color: theme.colorScheme.primary),
+                Icon(
+                  Icons.workspace_premium_rounded,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 Text('LuxeStays Rewards', style: theme.textTheme.titleMedium),
                 const Spacer(),
@@ -369,8 +374,9 @@ class _TotalsPanel extends ConsumerWidget {
             Text(
               value,
               style: emphasise
-                  ? theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w700)
+                  ? theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    )
                   : theme.textTheme.bodyMedium,
             ),
           ],
@@ -384,8 +390,10 @@ class _TotalsPanel extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: <Widget>[
-            row('Subtotal (${cart.roomNights} room nights)',
-                totals.subtotal.format()),
+            row(
+              'Subtotal (${cart.roomNights} room nights)',
+              totals.subtotal.format(),
+            ),
             if (!totals.voucherDiscount.isZero)
               row('Reward voucher', '−${totals.voucherDiscount.format()}'),
             if (!totals.pointsDiscount.isZero)
@@ -398,8 +406,9 @@ class _TotalsPanel extends ConsumerWidget {
               child: Text(
                 'You will earn about ${totals.estimatedPointsEarned} points. '
                 'Final points are confirmed by Salesforce after your stay.',
-                style: theme.textTheme.labelSmall
-                    ?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
               ),
             ),
           ],

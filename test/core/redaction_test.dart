@@ -48,8 +48,9 @@ void main() {
 
     test('is case-insensitive about key names', () {
       expect(
-        AppLogger.redact(
-            <String, Object?>{'ACCESS_TOKEN': 'x'})['ACCESS_TOKEN'],
+        AppLogger.redact(<String, Object?>{
+          'ACCESS_TOKEN': 'x',
+        })['ACCESS_TOKEN'],
         '***',
       );
     });

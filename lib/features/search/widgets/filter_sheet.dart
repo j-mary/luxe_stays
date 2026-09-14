@@ -12,11 +12,7 @@ import '../../../domain/search.dart';
 /// CRS returns - promotion and corporate codes, member-rate access - are the
 /// exception and do trigger a new request.
 class FilterSheet extends StatefulWidget {
-  const FilterSheet({
-    required this.initial,
-    required this.currency,
-    super.key,
-  });
+  const FilterSheet({required this.initial, required this.currency, super.key});
 
   final SearchFilters initial;
   final String currency;
@@ -95,8 +91,10 @@ class _FilterSheetState extends State<FilterSheet> {
                   Text(
                     _filters.maxNightlyRateMinor == null
                         ? 'Any'
-                        : Money(_filters.maxNightlyRateMinor!, widget.currency)
-                            .format(),
+                        : Money(
+                            _filters.maxNightlyRateMinor!,
+                            widget.currency,
+                          ).format(),
                     style: theme.textTheme.labelLarge,
                   ),
                 ],
@@ -128,8 +126,9 @@ class _FilterSheetState extends State<FilterSheet> {
                         label: Text(plan.label),
                         selected: _filters.mealPlans.contains(plan),
                         onSelected: (bool selected) => setState(() {
-                          final Set<MealPlan> next =
-                              Set<MealPlan>.from(_filters.mealPlans);
+                          final Set<MealPlan> next = Set<MealPlan>.from(
+                            _filters.mealPlans,
+                          );
                           if (selected) {
                             next.add(plan);
                           } else {

@@ -50,8 +50,9 @@ class _SignInView extends ConsumerStatefulWidget {
 }
 
 class _SignInViewState extends ConsumerState<_SignInView> {
-  final TextEditingController _controller =
-      TextEditingController(text: 'LS-100042');
+  final TextEditingController _controller = TextEditingController(
+    text: 'LS-100042',
+  );
 
   @override
   void dispose() {
@@ -68,8 +69,11 @@ class _SignInViewState extends ConsumerState<_SignInView> {
       padding: const EdgeInsets.all(24),
       children: <Widget>[
         const SizedBox(height: 24),
-        Icon(Icons.workspace_premium_rounded,
-            size: 56, color: theme.colorScheme.primary),
+        Icon(
+          Icons.workspace_premium_rounded,
+          size: 56,
+          color: theme.colorScheme.primary,
+        ),
         const SizedBox(height: 16),
         Text(
           'Members stay for less',
@@ -96,16 +100,17 @@ class _SignInViewState extends ConsumerState<_SignInView> {
         if (session.failure != null)
           Text(
             session.failure!.userMessage,
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: theme.colorScheme.error),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
           ),
         const SizedBox(height: 12),
         FilledButton(
           onPressed: session.isLoading
               ? null
               : () => ref
-                  .read(sessionProvider.notifier)
-                  .signIn(_controller.text.trim()),
+                    .read(sessionProvider.notifier)
+                    .signIn(_controller.text.trim()),
           child: session.isLoading
               ? const SizedBox(
                   height: 18,
@@ -271,8 +276,11 @@ class _TierCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(Icons.workspace_premium_outlined,
-                  size: 14, color: _brass),
+              const Icon(
+                Icons.workspace_premium_outlined,
+                size: 14,
+                color: _brass,
+              ),
               const SizedBox(width: 7),
               Text(
                 '${member.tier.label.toUpperCase()} MEMBER',
@@ -335,7 +343,7 @@ class _TierCard extends StatelessWidget {
               toNext == 0
                   ? '${member.tier.next!.label} unlocked on your next stay'
                   : '$toNext more night${toNext == 1 ? '' : 's'} to '
-                      '${member.tier.next!.label}',
+                        '${member.tier.next!.label}',
               style: theme.textTheme.bodySmall?.copyWith(color: onPanelMuted),
             ),
           ],
@@ -357,8 +365,10 @@ class _TierCard extends StatelessWidget {
                       ),
                       child: Text(
                         benefit,
-                        style: theme.textTheme.labelMedium
-                            ?.copyWith(color: onPanel, fontSize: 12),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: onPanel,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   )

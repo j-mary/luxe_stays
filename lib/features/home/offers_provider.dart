@@ -13,11 +13,13 @@ import '../account/session_controller.dart';
 /// engineer.
 final FutureProvider<List<CmsOffer>> offersProvider =
     FutureProvider<List<CmsOffer>>((Ref ref) async {
-  final bool isMember = ref.watch(sessionProvider).isSignedIn;
-  final List<CmsOffer> offers = await ref.watch(cmsRepositoryProvider).offers();
-  // Member-only campaigns are hidden from signed-out guests, exactly as the
-  // CMS entry declares.
-  return offers
-      .where((CmsOffer offer) => isMember || !offer.memberOnly)
-      .toList(growable: false);
-});
+      final bool isMember = ref.watch(sessionProvider).isSignedIn;
+      final List<CmsOffer> offers = await ref
+          .watch(cmsRepositoryProvider)
+          .offers();
+      // Member-only campaigns are hidden from signed-out guests, exactly as the
+      // CMS entry declares.
+      return offers
+          .where((CmsOffer offer) => isMember || !offer.memberOnly)
+          .toList(growable: false);
+    });

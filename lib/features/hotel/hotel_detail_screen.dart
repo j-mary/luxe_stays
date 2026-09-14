@@ -25,8 +25,9 @@ class HotelDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<HotelDetail> detail =
-        ref.watch(hotelDetailProvider(args.hotelId));
+    final AsyncValue<HotelDetail> detail = ref.watch(
+      hotelDetailProvider(args.hotelId),
+    );
 
     return Scaffold(
       body: detail.when(
@@ -131,9 +132,10 @@ class _HotelDetailBody extends ConsumerWidget {
                   Text(
                     'Editorial content from the CMS'
                     '${hotel.editorial!.updatedAt != null ? ' · updated '
-                        '${formatShortDate(hotel.editorial!.updatedAt!)}' : ''}',
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(color: theme.colorScheme.outline),
+                              '${formatShortDate(hotel.editorial!.updatedAt!)}' : ''}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
                   ),
                 ],
                 if (hotel.amenities.isNotEmpty) ...<Widget>[
@@ -154,9 +156,7 @@ class _HotelDetailBody extends ConsumerWidget {
           SliverToBoxAdapter(
             child: _Gallery(assets: hotel.gallery.skip(1).toList()),
           ),
-        const SliverToBoxAdapter(
-          child: SectionHeading(label: 'ROOMS & RATES'),
-        ),
+        const SliverToBoxAdapter(child: SectionHeading(label: 'ROOMS & RATES')),
         if (detail.offers.isEmpty)
           SliverToBoxAdapter(
             child: Padding(
@@ -244,7 +244,7 @@ class _Gallery extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
         itemCount: assets.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (BuildContext context, int index) => SizedBox(
           width: 226,
           child: MediaImage(
@@ -295,8 +295,9 @@ class _RoomSection extends ConsumerWidget {
                     if (room.bedding.isNotEmpty) room.bedding,
                     'Sleeps ${room.maxOccupancy}',
                   ].join(' · '),
-                  style: theme.textTheme.labelSmall
-                      ?.copyWith(color: theme.colorScheme.outline),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
                 ),
               ),
               const Divider(height: 24),
@@ -321,8 +322,9 @@ class _OfferRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ThemeData theme = Theme.of(context);
     final Cart cart = ref.watch(cartProvider);
-    final bool inCart =
-        cart.items.any((CartItem item) => item.offer.offerId == offer.offerId);
+    final bool inCart = cart.items.any(
+      (CartItem item) => item.offer.offerId == offer.offerId,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -352,10 +354,7 @@ class _OfferRow extends ConsumerWidget {
                     ],
                   ],
                 ),
-                Text(
-                  offer.mealPlan.label,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(offer.mealPlan.label, style: theme.textTheme.bodySmall),
                 Text(
                   offer.cancellationPolicy.shortLabel,
                   style: theme.textTheme.labelSmall?.copyWith(
@@ -367,8 +366,9 @@ class _OfferRow extends ConsumerWidget {
                 if (offer.inclusions.isNotEmpty)
                   Text(
                     offer.inclusions.join(' · '),
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(color: theme.colorScheme.outline),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
                   ),
               ],
             ),
@@ -377,10 +377,7 @@ class _OfferRow extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              Text(
-                offer.total.format(),
-                style: theme.textTheme.titleLarge,
-              ),
+              Text(offer.total.format(), style: theme.textTheme.titleLarge),
               Text(
                 'total · ${offer.stay.nights} night'
                 '${offer.stay.nights == 1 ? '' : 's'}',

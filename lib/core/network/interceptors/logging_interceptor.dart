@@ -12,11 +12,11 @@ import 'correlation_interceptor.dart';
 ///   is what you actually need when chasing "the search screen feels slow".
 class LoggingInterceptor extends Interceptor {
   LoggingInterceptor({
-    required AppLogger logger,
+    required this._logger,
     required this.integration,
     this.verbose = false,
     this.maxBodyChars = 2000,
-  }) : _logger = logger;
+  });
 
   final AppLogger _logger;
   final String integration;
@@ -45,8 +45,9 @@ class LoggingInterceptor extends Interceptor {
     _logger.info(
       '← ${response.statusCode} ${response.requestOptions.method} '
       '${response.requestOptions.uri}',
-      correlationId: response
-          .requestOptions.extra[CorrelationInterceptor.extraKey] as String?,
+      correlationId:
+          response.requestOptions.extra[CorrelationInterceptor.extraKey]
+              as String?,
       context: <String, Object?>{
         'integration': integration,
         'durationMs': _durationMs(response.requestOptions),

@@ -39,8 +39,9 @@ class FailureView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 'Reference ${failure.correlationId}',
-                style: theme.textTheme.labelSmall
-                    ?.copyWith(color: theme.colorScheme.outline),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
               ),
             ],
             const SizedBox(height: 20),
@@ -63,13 +64,13 @@ class FailureView extends StatelessWidget {
   }
 
   static IconData _iconFor(Failure failure) => switch (failure) {
-        NetworkFailure() => Icons.wifi_off_rounded,
-        AuthFailure() => Icons.lock_outline_rounded,
-        RateLimitFailure() => Icons.hourglass_bottom_rounded,
-        RateChangedFailure() => Icons.price_change_outlined,
-        PaymentFailure() => Icons.credit_card_off_outlined,
-        _ => Icons.error_outline_rounded,
-      };
+    NetworkFailure() => Icons.wifi_off_rounded,
+    AuthFailure() => Icons.lock_outline_rounded,
+    RateLimitFailure() => Icons.hourglass_bottom_rounded,
+    RateChangedFailure() => Icons.price_change_outlined,
+    PaymentFailure() => Icons.credit_card_off_outlined,
+    _ => Icons.error_outline_rounded,
+  };
 }
 
 /// Empty state with an optional call to action.
@@ -104,8 +105,9 @@ class EmptyView extends StatelessWidget {
               Text(
                 message!,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
             if (action != null) ...<Widget>[
@@ -135,13 +137,10 @@ class SkeletonCard extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     Widget bar(double widthFactor, double height) => FractionallySizedBox(
-          alignment: Alignment.centerLeft,
-          widthFactor: widthFactor,
-          child: Container(
-            height: height,
-            color: colors.surfaceContainerHighest,
-          ),
-        );
+      alignment: Alignment.centerLeft,
+      widthFactor: widthFactor,
+      child: Container(height: height, color: colors.surfaceContainerHighest),
+    );
 
     return ColoredBox(
       color: colors.surface,

@@ -7,7 +7,8 @@
 extension DateOnlyX on DateTime {
   DateTime get dateOnly => DateTime(year, month, day);
 
-  String get iso8601Date => '${year.toString().padLeft(4, '0')}-'
+  String get iso8601Date =>
+      '${year.toString().padLeft(4, '0')}-'
       '${month.toString().padLeft(2, '0')}-'
       '${day.toString().padLeft(2, '0')}';
 
@@ -20,8 +21,8 @@ extension DateOnlyX on DateTime {
 /// An inclusive-exclusive stay: [checkIn, checkOut).
 class DateRange {
   DateRange(DateTime checkIn, DateTime checkOut)
-      : checkIn = checkIn.dateOnly,
-        checkOut = checkOut.dateOnly {
+    : checkIn = checkIn.dateOnly,
+      checkOut = checkOut.dateOnly {
     assert(
       this.checkOut.isAfter(this.checkIn),
       'Check-out must be after check-in (a same-day stay is not a stay).',
@@ -39,10 +40,10 @@ class DateRange {
   /// Each date the guest is *in house* (check-out day excluded) - the set of
   /// dates a nightly rate is quoted for.
   List<DateTime> get stayDates => List<DateTime>.generate(
-        nights,
-        (int i) => checkIn.addDays(i),
-        growable: false,
-      );
+    nights,
+    (int i) => checkIn.addDays(i),
+    growable: false,
+  );
 
   String get label => '${checkIn.iso8601Date} → ${checkOut.iso8601Date}';
 

@@ -21,12 +21,10 @@ import 'salesforce_models.dart';
 /// from breaking a shipped app binary.
 class SalesforceApi {
   SalesforceApi({
-    required ApiClient client,
-    required String apiVersion,
+    required this._client,
+    required this._apiVersion,
     required String loyaltyProgramName,
-  })  : _client = client,
-        _apiVersion = apiVersion,
-        _programName = loyaltyProgramName;
+  }) : _programName = loyaltyProgramName;
 
   final ApiClient _client;
   final String _apiVersion;
@@ -48,8 +46,10 @@ class SalesforceApi {
         if (members == null) {
           return SalesforceMemberDto.fromJson(root);
         }
-        final List<Map<String, Object?>> list =
-            JsonRead.objectList(members, 'members');
+        final List<Map<String, Object?>> list = JsonRead.objectList(
+          members,
+          'members',
+        );
         if (list.isEmpty) {
           throw StateError('no member for $membershipNumber');
         }
@@ -71,9 +71,10 @@ class SalesforceApi {
       '$_loyalty/members/$memberId/vouchers',
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        return JsonRead.objectList(root['vouchers'], 'vouchers')
-            .map(SalesforceVoucherDto.fromJson)
-            .toList(growable: false);
+        return JsonRead.objectList(
+          root['vouchers'],
+          'vouchers',
+        ).map(SalesforceVoucherDto.fromJson).toList(growable: false);
       },
     );
   }
@@ -90,7 +91,8 @@ class SalesforceApi {
     String memberId, {
     int limit = 50,
   }) {
-    final String soql = 'SELECT Id, EventDate, Points, Description, EventType, '
+    final String soql =
+        'SELECT Id, EventDate, Points, Description, EventType, '
         'JournalReference, HotelName FROM LoyaltyLedger '
         "WHERE LoyaltyProgramMemberId = '$memberId' "
         'ORDER BY EventDate DESC LIMIT $limit';
@@ -99,9 +101,10 @@ class SalesforceApi {
       query: <String, Object?>{'q': soql},
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        return JsonRead.objectList(root['records'], 'records')
-            .map(SalesforceLedgerEntryDto.fromJson)
-            .toList(growable: false);
+        return JsonRead.objectList(
+          root['records'],
+          'records',
+        ).map(SalesforceLedgerEntryDto.fromJson).toList(growable: false);
       },
     );
   }
@@ -161,7 +164,7 @@ class SalesforceApi {
             'TransactionJournalType': 'Redemption',
             'Points': points,
             'CurrencyIsoCode': currency,
-            if (cartId != null) 'ExternalReference': cartId,
+            'ExternalReference': ?cartId,
             'Channel': 'Mobile App',
           },
         ],
@@ -217,9 +220,9 @@ class SalesforceApi {
         'Description': description,
         'Priority': priority,
         'Origin': origin,
-        if (contactId != null) 'ContactId': contactId,
-        if (bookingReference != null) 'BookingReference__c': bookingReference,
-        if (correlationId != null) 'CorrelationId__c': correlationId,
+        'ContactId': ?contactId,
+        'BookingReference__c': ?bookingReference,
+        'CorrelationId__c': ?correlationId,
       },
       decode: (Object? json) =>
           JsonRead.string(JsonRead.object(json, 'root'), 'id'),

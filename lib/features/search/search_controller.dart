@@ -42,12 +42,15 @@ class SearchState {
 /// `AsyncValue`. That keeps the multi-vendor fan-out testable without a widget
 /// tree, and keeps this class small enough to read in one sitting.
 class HotelSearchController extends Notifier<SearchState> {
+  int _requestVersion = 0;
   @override
   SearchState build() {
     // React to sign-in/sign-out: member rates change the result set, so the
     // search must be re-run rather than showing stale public pricing.
-    ref.listen<SessionState>(sessionProvider,
-        (SessionState? previous, SessionState next) {
+    ref.listen<SessionState>(sessionProvider, (
+      SessionState? previous,
+      SessionState next,
+    ) {
       if (previous?.membershipNumber != next.membershipNumber &&
           state.lastSearchedAt != null) {
         unawaited(search(forceRefresh: true));
@@ -62,11 +65,13 @@ class HotelSearchController extends Notifier<SearchState> {
     // state while `build()` is still running.
     bool disposed = false;
     ref.onDispose(() => disposed = true);
-    unawaited(Future<void>.microtask(() {
-      if (!disposed) {
-        unawaited(search());
-      }
-    }));
+    unawaited(
+      Future<void>.microtask(() {
+        if (!disposed) {
+          unawaited(search());
+        }
+      }),
+    );
 
     return SearchState(query: SearchQuery.initial());
   }
@@ -83,8 +88,9 @@ class HotelSearchController extends Notifier<SearchState> {
   }
 
   void updateDestination(Destination destination) {
-    state =
-        state.copyWith(query: state.query.copyWith(destination: destination));
+    state = state.copyWith(
+      query: state.query.copyWith(destination: destination),
+    );
   }
 
   void updateStay(DateRange stay) {
@@ -104,30 +110,35 @@ class HotelSearchController extends Notifier<SearchState> {
   }
 
   Future<void> search({bool forceRefresh = false}) async {
+    final int requestVersion = ++_requestVersion;
     final SearchQuery query = state.query;
     state = state.copyWith(
       results: const AsyncValue<List<HotelSearchResult>>.loading(),
     );
 
-    ref.read(analyticsProvider).event(
-      AnalyticsEvents.searchPerformed,
-      parameters: <String, Object?>{
-        'destination': query.destination.id,
-        'nights': query.stay.nights,
-        'adults': query.occupancy.adults,
-        'children': query.occupancy.children.length,
-        'filters': query.filters.activeCount,
-        'member': ref.read(sessionProvider).isSignedIn,
-      },
-    );
+    ref
+        .read(analyticsProvider)
+        .event(
+          AnalyticsEvents.searchPerformed,
+          parameters: <String, Object?>{
+            'destination': query.destination.id,
+            'nights': query.stay.nights,
+            'adults': query.occupancy.adults,
+            'children': query.occupancy.children.length,
+            'filters': query.filters.activeCount,
+            'member': ref.read(sessionProvider).isSignedIn,
+          },
+        );
 
-    final Result<List<HotelSearchResult>> result =
-        await ref.read(hotelRepositoryProvider).search(
-              query,
-              membershipNumber: ref.read(sessionProvider).membershipNumber,
-              forceRefresh: forceRefresh,
-            );
+    final Result<List<HotelSearchResult>> result = await ref
+        .read(hotelRepositoryProvider)
+        .search(
+          query,
+          membershipNumber: ref.read(sessionProvider).membershipNumber,
+          forceRefresh: forceRefresh,
+        );
 
+    if (!ref.mounted || requestVersion != _requestVersion) return;
     state = state.copyWith(
       lastSearchedAt: DateTime.now(),
       results: result.fold<AsyncValue<List<HotelSearchResult>>>(
@@ -147,8 +158,8 @@ class HotelSearchController extends Notifier<SearchState> {
 /// are in scope in any screen that imports `material.dart`.
 final NotifierProvider<HotelSearchController, SearchState> searchProvider =
     NotifierProvider<HotelSearchController, SearchState>(
-  HotelSearchController.new,
-);
+      HotelSearchController.new,
+    );
 
 /// Destinations offered on the search screen.
 ///

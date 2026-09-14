@@ -53,11 +53,8 @@ class LogRecord {
 }
 
 class AppLogger {
-  AppLogger({
-    LogLevel minimumLevel = LogLevel.debug,
-    List<LogSink>? sinks,
-  })  : _minimumLevel = minimumLevel,
-        _sinks = sinks ?? <LogSink>[_developerSink];
+  AppLogger({this._minimumLevel = LogLevel.debug, List<LogSink>? sinks})
+    : _sinks = sinks ?? <LogSink>[_developerSink];
 
   final LogLevel _minimumLevel;
   final List<LogSink> _sinks;
@@ -85,21 +82,24 @@ class AppLogger {
     'guestname',
   };
 
-  void debug(String message,
-          {String? correlationId, Map<String, Object?>? context}) =>
-      _log(LogLevel.debug, message, correlationId, context, null, null);
+  void debug(
+    String message, {
+    String? correlationId,
+    Map<String, Object?>? context,
+  }) => _log(LogLevel.debug, message, correlationId, context, null, null);
 
-  void info(String message,
-          {String? correlationId, Map<String, Object?>? context}) =>
-      _log(LogLevel.info, message, correlationId, context, null, null);
+  void info(
+    String message, {
+    String? correlationId,
+    Map<String, Object?>? context,
+  }) => _log(LogLevel.info, message, correlationId, context, null, null);
 
   void warn(
     String message, {
     String? correlationId,
     Map<String, Object?>? context,
     Object? error,
-  }) =>
-      _log(LogLevel.warn, message, correlationId, context, error, null);
+  }) => _log(LogLevel.warn, message, correlationId, context, error, null);
 
   void error(
     String message, {

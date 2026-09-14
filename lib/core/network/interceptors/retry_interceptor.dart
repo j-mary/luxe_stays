@@ -18,15 +18,13 @@ import 'correlation_interceptor.dart';
 /// handsets recovering from the same CRS blip do not stampede.
 class RetryInterceptor extends Interceptor {
   RetryInterceptor({
-    required Dio dio,
-    required AppLogger logger,
+    required this._dio,
+    required this._logger,
     this.maxAttempts = 3,
     this.baseDelay = const Duration(milliseconds: 300),
     this.maxDelay = const Duration(seconds: 8),
     Random? random,
-  })  : _dio = dio,
-        _logger = logger,
-        _random = random ?? Random();
+  }) : _random = random ?? Random();
 
   static const String _attemptKey = 'retryAttempt';
 
@@ -111,8 +109,9 @@ class RetryInterceptor extends Interceptor {
       }
     }
     final int ceilingMs = min(
-        baseDelay.inMilliseconds * pow(2, attempt).toInt(),
-        maxDelay.inMilliseconds);
+      baseDelay.inMilliseconds * pow(2, attempt).toInt(),
+      maxDelay.inMilliseconds,
+    );
     return Duration(milliseconds: _random.nextInt(ceilingMs + 1));
   }
 }

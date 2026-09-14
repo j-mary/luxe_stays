@@ -92,34 +92,38 @@ abstract final class AppTheme {
     final bool isLight = brightness == Brightness.light;
 
     final ColorScheme scheme =
-        ColorScheme.fromSeed(seedColor: _goldDeep, brightness: brightness)
-            .copyWith(
-      primary: isLight ? _goldDeep : _goldLight,
-      onPrimary: isLight ? Colors.white : const Color(0xFF241A0B),
-      secondary: isLight ? _gold : _goldLight,
-      onSecondary: Colors.white,
-      surface: isLight ? _card : _darkCard,
-      onSurface: isLight ? _ink : _darkInk,
-      onSurfaceVariant: isLight ? _inkMuted : _darkInkMuted,
-      outline: isLight ? _inkFaint : const Color(0xFF544C42),
-      outlineVariant: isLight ? _hairline : _darkHairline,
-      error: _danger,
-      onError: Colors.white,
-      // Neutral containers. A tinted container is the wash this theme exists to
-      // avoid; emphasis comes from a rule, a weight or the ink plate.
-      primaryContainer: isLight ? _subtle : _darkSubtle,
-      onPrimaryContainer: isLight ? _ink : _darkInk,
-      secondaryContainer: isLight ? _subtle : _darkSubtle,
-      onSecondaryContainer: isLight ? _ink : _darkInk,
-      surfaceContainerHighest: isLight ? _subtle : _darkSubtle,
-      errorContainer:
-          isLight ? const Color(0xFFF7E8E4) : const Color(0xFF2E1714),
-      onErrorContainer:
-          isLight ? const Color(0xFF5C1E15) : const Color(0xFFF0C8C1),
-      // Removes Material 3's elevation tint, which would otherwise put a gold
-      // wash over any scrolled-under app bar.
-      surfaceTint: Colors.transparent,
-    );
+        ColorScheme.fromSeed(
+          seedColor: _goldDeep,
+          brightness: brightness,
+        ).copyWith(
+          primary: isLight ? _goldDeep : _goldLight,
+          onPrimary: isLight ? Colors.white : const Color(0xFF241A0B),
+          secondary: isLight ? _gold : _goldLight,
+          onSecondary: Colors.white,
+          surface: isLight ? _card : _darkCard,
+          onSurface: isLight ? _ink : _darkInk,
+          onSurfaceVariant: isLight ? _inkMuted : _darkInkMuted,
+          outline: isLight ? _inkFaint : const Color(0xFF544C42),
+          outlineVariant: isLight ? _hairline : _darkHairline,
+          error: _danger,
+          onError: Colors.white,
+          // Neutral containers. A tinted container is the wash this theme exists to
+          // avoid; emphasis comes from a rule, a weight or the ink plate.
+          primaryContainer: isLight ? _subtle : _darkSubtle,
+          onPrimaryContainer: isLight ? _ink : _darkInk,
+          secondaryContainer: isLight ? _subtle : _darkSubtle,
+          onSecondaryContainer: isLight ? _ink : _darkInk,
+          surfaceContainerHighest: isLight ? _subtle : _darkSubtle,
+          errorContainer: isLight
+              ? const Color(0xFFF7E8E4)
+              : const Color(0xFF2E1714),
+          onErrorContainer: isLight
+              ? const Color(0xFF5C1E15)
+              : const Color(0xFFF0C8C1),
+          // Removes Material 3's elevation tint, which would otherwise put a gold
+          // wash over any scrolled-under app bar.
+          surfaceTint: Colors.transparent,
+        );
 
     return ThemeData(
       useMaterial3: true,

@@ -131,11 +131,11 @@ class AppConfig {
   /// Origins the hybrid WebViews are allowed to navigate to. Anything else is
   /// blocked by `NavigationDelegate.onNavigationRequest`.
   List<String> get webViewAllowedOrigins => <String>[
-        Uri.parse(apiBaseUrl).origin,
-        Uri.parse(synxisBookingEngineUrl).origin,
-        Uri.parse(pspHostedPageUrl).origin,
-        Uri.parse(cmsBaseUrl).origin,
-      ];
+    Uri.parse(apiBaseUrl).origin,
+    Uri.parse(synxisBookingEngineUrl).origin,
+    Uri.parse(pspHostedPageUrl).origin,
+    Uri.parse(cmsBaseUrl).origin,
+  ];
 
   static Flavor _flavorOf(String raw) {
     switch (raw) {

@@ -19,11 +19,10 @@ import 'synxis_models.dart';
 ///  * the re-quote-then-book guard that protects against price drift.
 class SynxisRepository {
   SynxisRepository({
-    required SynxisApi api,
-    required AppLogger logger,
+    required this._api,
+    required this._logger,
     this.availabilityTtl = const Duration(minutes: 5),
-  })  : _api = api,
-        _logger = logger;
+  });
 
   final SynxisApi _api;
   final AppLogger _logger;
@@ -33,8 +32,9 @@ class SynxisRepository {
       <String, _CachedAvailability>{};
 
   Future<Result<List<Hotel>>> hotels(Destination destination) async {
-    final Result<List<SynxisHotelDto>> result =
-        await _api.searchHotels(destination: destination);
+    final Result<List<SynxisHotelDto>> result = await _api.searchHotels(
+      destination: destination,
+    );
     return result.map(
       (List<SynxisHotelDto> dtos) => dtos
           .map(
@@ -66,10 +66,13 @@ class SynxisRepository {
         '#${membershipNumber ?? '-'}';
     final _CachedAvailability? cached = _availabilityCache[key];
     if (!forceRefresh && cached != null && !cached.isStale(availabilityTtl)) {
-      _logger.debug('availability cache hit', context: <String, Object?>{
-        'key': key,
-        'ageMs': DateTime.now().difference(cached.at).inMilliseconds,
-      });
+      _logger.debug(
+        'availability cache hit',
+        context: <String, Object?>{
+          'key': key,
+          'ageMs': DateTime.now().difference(cached.at).inMilliseconds,
+        },
+      );
       return Ok<Map<String, List<RoomOffer>>>(cached.offers);
     }
 
@@ -86,15 +89,19 @@ class SynxisRepository {
           context: <String, Object?>{'warnings': dto.warnings},
         );
       }
-      final Map<String, List<RoomOffer>> offers =
-          dto.offersByHotelId.map((String hotelId, List<SynxisOfferDto> list) {
+      final Map<String, List<RoomOffer>> offers = dto.offersByHotelId.map((
+        String hotelId,
+        List<SynxisOfferDto> list,
+      ) {
         return MapEntry<String, List<RoomOffer>>(
           hotelId,
           list.map((SynxisOfferDto o) => o.toDomain()).toList(growable: false),
         );
       });
-      _availabilityCache[key] =
-          _CachedAvailability(offers: offers, at: DateTime.now());
+      _availabilityCache[key] = _CachedAvailability(
+        offers: offers,
+        at: DateTime.now(),
+      );
       return offers;
     });
   }
@@ -124,31 +131,28 @@ class SynxisRepository {
       offerToken: token,
     );
 
-    return result.fold<Result<RoomOffer>>(
-      (SynxisOfferDto dto) {
-        final RoomOffer fresh = dto.toDomain();
-        if (fresh.total != offer.total) {
-          _logger.warn(
-            'rate drift detected',
-            context: <String, Object?>{
-              'offerId': offer.offerId,
-              'was': offer.total.minorUnits,
-              'now': fresh.total.minorUnits,
-            },
-          );
-          return Err<RoomOffer>(
-            RateChangedFailure(
-              developerMessage: 'rate changed for ${offer.offerId}',
-              previousTotalMinor: offer.total.minorUnits,
-              currentTotalMinor: fresh.total.minorUnits,
-              currency: fresh.total.currency,
-            ),
-          );
-        }
-        return Ok<RoomOffer>(fresh);
-      },
-      Err<RoomOffer>.new,
-    );
+    return result.fold<Result<RoomOffer>>((SynxisOfferDto dto) {
+      final RoomOffer fresh = dto.toDomain();
+      if (fresh.total != offer.total) {
+        _logger.warn(
+          'rate drift detected',
+          context: <String, Object?>{
+            'offerId': offer.offerId,
+            'was': offer.total.minorUnits,
+            'now': fresh.total.minorUnits,
+          },
+        );
+        return Err<RoomOffer>(
+          RateChangedFailure(
+            developerMessage: 'rate changed for ${offer.offerId}',
+            previousTotalMinor: offer.total.minorUnits,
+            currentTotalMinor: fresh.total.minorUnits,
+            currency: fresh.total.currency,
+          ),
+        );
+      }
+      return Ok<RoomOffer>(fresh);
+    }, Err<RoomOffer>.new);
   }
 
   Future<Result<Reservation>> book({
@@ -196,8 +200,9 @@ class SynxisRepository {
       _api.cancelReservation(confirmationNumber, reason: reason);
 
   Future<Result<List<RoomType>>> roomTypes(String hotelId) async {
-    final Result<List<SynxisRoomTypeDto>> result =
-        await _api.roomTypes(hotelId);
+    final Result<List<SynxisRoomTypeDto>> result = await _api.roomTypes(
+      hotelId,
+    );
     return result.map(
       (List<SynxisRoomTypeDto> dtos) => dtos
           .map((SynxisRoomTypeDto d) => d.toDomain())

@@ -2,6 +2,8 @@
 .PHONY: help bootstrap patch-platforms mock run run-emulator run-lan adb-reverse ip \
         analyze format test coverage integration ci clean
 
+FLUTTER ?= fvm flutter
+DART ?= fvm dart
 FLAVOR ?= dev
 PORT   ?= 8080
 
@@ -32,13 +34,13 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 bootstrap: ## Fetch dependencies
-	flutter pub get
+	$(FLUTTER) pub get
 
 patch-platforms: ## Re-apply the WebView platform settings (only after regenerating hosts)
 	bash tool/patch_platforms.sh
 
 mock: ## Run the mock SynXis / Salesforce / CMS / Leonardo / PSP back end
-	dart run tool/mock_server/server.dart --port $(PORT)
+	$(DART) run tool/mock_server/server.dart --port $(PORT)
 
 adb-reverse: ## Android on USB: tunnel the device's localhost:8080 to this Mac
 	adb reverse tcp:$(PORT) tcp:$(PORT)
@@ -50,7 +52,7 @@ ip: ## Print this Mac's LAN IP (for a physical device on Wi-Fi)
 
 run: ## Run against the mock back end (HOST=localhost; override with HOST=...)
 	@echo "→ app will call $(BASE)"
-	flutter run $(DEFINES)
+	$(FLUTTER) run $(DEFINES)
 
 run-emulator: HOST = 10.0.2.2
 run-emulator: run ## Run on an Android emulator (uses 10.0.2.2)
@@ -59,22 +61,22 @@ run-lan: HOST = $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr
 run-lan: run ## Run on a physical device over Wi-Fi (uses this Mac's LAN IP)
 
 analyze: ## Static analysis
-	flutter analyze
+	$(FLUTTER) analyze
 
 format: ## Format all Dart sources
-	dart format lib test integration_test tool
+	$(DART) format lib test integration_test tool
 
 test: ## Unit + widget tests
-	flutter test
+	$(FLUTTER) test
 
 coverage: ## Unit + widget tests with coverage report
-	flutter test --coverage
+	$(FLUTTER) test --coverage
 	@echo "lcov report at coverage/lcov.info"
 
 integration: ## Integration tests (needs a booted device/emulator + mock server)
-	flutter test integration_test $(DEFINES)
+	$(FLUTTER) test integration_test $(DEFINES)
 
 ci: bootstrap format analyze test ## What CI runs
 
 clean:
-	flutter clean
+	$(FLUTTER) clean

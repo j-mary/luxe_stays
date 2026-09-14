@@ -30,19 +30,19 @@ class OAuthTokens {
   final DateTime expiresAt;
 
   /// Treat a token as expired 60s early so a request never dies in flight.
-  bool get isExpired => DateTime.now()
-      .toUtc()
-      .isAfter(expiresAt.subtract(const Duration(seconds: 60)));
+  bool get isExpired => DateTime.now().toUtc().isAfter(
+    expiresAt.subtract(const Duration(seconds: 60)),
+  );
 
   String get authorizationHeader => '$tokenType $accessToken';
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'accessToken': accessToken,
-        'refreshToken': refreshToken,
-        'instanceUrl': instanceUrl,
-        'tokenType': tokenType,
-        'expiresAt': expiresAt.toIso8601String(),
-      };
+    'accessToken': accessToken,
+    'refreshToken': refreshToken,
+    'instanceUrl': instanceUrl,
+    'tokenType': tokenType,
+    'expiresAt': expiresAt.toIso8601String(),
+  };
 }
 
 /// Where access/refresh tokens live.
@@ -56,16 +56,17 @@ abstract interface class TokenStore {
   Future<void> clear();
 }
 
-/// Keychain (iOS) / EncryptedSharedPreferences (Android) backed store.
+/// Keychain (iOS) / platform encrypted storage (Android) backed store.
 class SecureTokenStore implements TokenStore {
   SecureTokenStore([FlutterSecureStorage? storage])
-      : _storage = storage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions(encryptedSharedPreferences: true),
-              iOptions: IOSOptions(
-                accessibility: KeychainAccessibility.first_unlock_this_device,
-              ),
-            );
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.first_unlock_this_device,
+            ),
+          );
 
   final FlutterSecureStorage _storage;
 
@@ -75,12 +76,19 @@ class SecureTokenStore implements TokenStore {
     if (raw == null) {
       return null;
     }
-    final Object? decoded = jsonDecode(raw);
-    if (decoded is! Map<String, Object?>) {
+    try {
+      final Object? decoded = jsonDecode(raw);
+      if (decoded is! Map<String, Object?>) {
+        throw const FormatException('Invalid token data');
+      }
+      return OAuthTokens.fromJson(decoded);
+    } on FormatException {
+      await _storage.delete(key: key);
+      return null;
+    } on TypeError {
       await _storage.delete(key: key);
       return null;
     }
-    return OAuthTokens.fromJson(decoded);
   }
 
   @override

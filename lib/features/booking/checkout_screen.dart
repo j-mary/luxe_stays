@@ -58,7 +58,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   }
 
   GuestDetails _collect() {
-    return ref.read(checkoutProvider).guest.copyWith(
+    return ref
+        .read(checkoutProvider)
+        .guest
+        .copyWith(
           firstName: _firstName.text.trim(),
           lastName: _lastName.text.trim(),
           email: _email.text.trim(),
@@ -90,13 +93,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     // The WebView is a full-screen route that returns a PaymentResult. Nothing
     // else in the app knows the payment page exists.
-    final PaymentResult? result =
-        await Navigator.of(context).push<PaymentResult>(
-      MaterialPageRoute<PaymentResult>(
-        builder: (BuildContext context) => PaymentWebViewScreen(intent: intent),
-        fullscreenDialog: true,
-      ),
-    );
+    final PaymentResult? result = await Navigator.of(context)
+        .push<PaymentResult>(
+          MaterialPageRoute<PaymentResult>(
+            builder: (BuildContext context) =>
+                PaymentWebViewScreen(intent: intent),
+            fullscreenDialog: true,
+          ),
+        );
 
     if (!mounted) {
       return;
@@ -164,8 +168,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ),
                         validator: (String? value) =>
                             (value == null || value.trim().length < 2)
-                                ? 'Required'
-                                : null,
+                            ? 'Required'
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -179,8 +183,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ),
                         validator: (String? value) =>
                             (value == null || value.trim().length < 2)
-                                ? 'Required'
-                                : null,
+                            ? 'Required'
+                            : null,
                       ),
                     ),
                   ],
@@ -196,8 +200,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (String? value) {
-                    final GuestDetails probe =
-                        _collect().copyWith(email: value ?? '');
+                    final GuestDetails probe = _collect().copyWith(
+                      email: value ?? '',
+                    );
                     return probe.isValid || (value ?? '').contains('@')
                         ? null
                         : 'Enter a valid email';
@@ -215,8 +220,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                   validator: (String? value) =>
                       (value == null || value.trim().length < 6)
-                          ? 'Enter a contact number'
-                          : null,
+                      ? 'Enter a contact number'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -285,14 +290,18 @@ class _InlineFailure extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          Icon(Icons.error_outline_rounded,
-              color: theme.colorScheme.onErrorContainer, size: 18),
+          Icon(
+            Icons.error_outline_rounded,
+            color: theme.colorScheme.onErrorContainer,
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: theme.colorScheme.onErrorContainer),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onErrorContainer,
+              ),
             ),
           ),
         ],
@@ -336,8 +345,9 @@ class _OrderSummary extends StatelessWidget {
           Text(
             'Rewards applied: −'
             '${(totals.voucherDiscount + totals.pointsDiscount).format()}',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: theme.colorScheme.primary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
           ),
         ],
       ],
@@ -388,8 +398,9 @@ class _GuestSummary extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         guest.membershipNumber!,
-                        style: theme.textTheme.labelSmall
-                            ?.copyWith(color: colors.secondary),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colors.secondary,
+                        ),
                       ),
                     ],
                   ),

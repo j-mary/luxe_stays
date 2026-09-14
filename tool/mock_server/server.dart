@@ -8,6 +8,7 @@ import 'cms_routes.dart';
 import 'fixtures.dart';
 import 'leonardo_routes.dart';
 import 'payment_routes.dart';
+import 'property_hub_routes.dart';
 import 'salesforce_routes.dart';
 import 'support.dart';
 import 'synxis_routes.dart';
@@ -44,6 +45,7 @@ Future<void> main(List<String> args) async {
   final Router root = Router();
 
   root.mount('/synxis/', synxisRouter().call);
+  root.mount('/v1/sph/', propertyHubRouter().call);
   root.mount('/salesforce/', salesforceRouter().call);
   root.mount('/cms/', cmsRouter().call);
   root.mount('/leonardo/', leonardoRouter().call);
@@ -76,14 +78,15 @@ Future<void> main(List<String> args) async {
   });
 
   root.get(
-      '/health',
-      (Request request) => jsonResponse(<String, Object?>{
-            'status': 'ok',
-            'latencyMs': chaos.latency.inMilliseconds,
-            'failureRate': chaos.failureRate,
-            'hotels': mockHotels.length,
-            'members': mockMembers.length,
-          }));
+    '/health',
+    (Request request) => jsonResponse(<String, Object?>{
+      'status': 'ok',
+      'latencyMs': chaos.latency.inMilliseconds,
+      'failureRate': chaos.failureRate,
+      'hotels': mockHotels.length,
+      'members': mockMembers.length,
+    }),
+  );
 
   root.get('/', (Request request) => html(_indexPage(port)));
 
@@ -99,12 +102,17 @@ Future<void> main(List<String> args) async {
   );
   server.autoCompress = true;
 
-  stdout.writeln('LuxeStays mock back end listening on '
-      'http://localhost:${server.port}');
-  stdout.writeln('  latency=${chaos.latency.inMilliseconds}ms  '
-      'failRate=${chaos.failureRate}');
-  stdout
-      .writeln('  open http://localhost:${server.port}/ for the endpoint map');
+  stdout.writeln(
+    'LuxeStays mock back end listening on '
+    'http://localhost:${server.port}',
+  );
+  stdout.writeln(
+    '  latency=${chaos.latency.inMilliseconds}ms  '
+    'failRate=${chaos.failureRate}',
+  );
+  stdout.writeln(
+    '  open http://localhost:${server.port}/ for the endpoint map',
+  );
 }
 
 int? _intArg(List<String> args, String name) {
@@ -123,7 +131,8 @@ double? _doubleArg(List<String> args, String name) {
   return double.tryParse(args[index + 1]);
 }
 
-String _indexPage(int port) => '''
+String _indexPage(int port) =>
+    '''
 <!doctype html>
 <html lang="en">
 <head>

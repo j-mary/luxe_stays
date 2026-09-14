@@ -14,12 +14,10 @@ import 'cms_models.dart';
 /// Docs: https://www.contentful.com/developers/docs/references/content-delivery-api/
 class CmsClient {
   CmsClient({
-    required ApiClient client,
-    required String spaceId,
-    required String environment,
-  })  : _client = client,
-        _spaceId = spaceId,
-        _environment = environment;
+    required this._client,
+    required this._spaceId,
+    required this._environment,
+  });
 
   final ApiClient _client;
   final String _spaceId;

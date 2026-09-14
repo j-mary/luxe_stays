@@ -105,8 +105,9 @@ class HotelCard extends StatelessWidget {
                   else
                     _PriceRow(
                       offer: leadIn,
-                      onQuickAdd:
-                          onQuickAdd == null ? null : () => onQuickAdd!(leadIn),
+                      onQuickAdd: onQuickAdd == null
+                          ? null
+                          : () => onQuickAdd!(leadIn),
                     ),
                 ],
               ),

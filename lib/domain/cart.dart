@@ -49,8 +49,9 @@ class CartItem {
       heroImageUrl: heroImageUrl,
       specialRequests: specialRequests ?? this.specialRequests,
       status: status ?? this.status,
-      repriceMessage:
-          clearRepriceMessage ? null : (repriceMessage ?? this.repriceMessage),
+      repriceMessage: clearRepriceMessage
+          ? null
+          : (repriceMessage ?? this.repriceMessage),
     );
   }
 }
@@ -102,9 +103,9 @@ class Cart {
       items.fold(0, (int acc, CartItem i) => acc + i.offer.stay.nights);
 
   Money get subtotal => items.fold(
-        Money.zero(currency),
-        (Money acc, CartItem item) => acc + item.total,
-      );
+    Money.zero(currency),
+    (Money acc, CartItem item) => acc + item.total,
+  );
 
   Money voucherDiscount(LoyaltyProgramRules rules) {
     final LoyaltyVoucher? voucher = appliedVoucher;
@@ -138,8 +139,9 @@ class Cart {
     return Cart(
       id: id,
       items: items ?? this.items,
-      appliedVoucher:
-          clearVoucher ? null : (appliedVoucher ?? this.appliedVoucher),
+      appliedVoucher: clearVoucher
+          ? null
+          : (appliedVoucher ?? this.appliedVoucher),
       pointsToRedeem: pointsToRedeem ?? this.pointsToRedeem,
       revision: revision ?? this.revision,
       currency: currency,

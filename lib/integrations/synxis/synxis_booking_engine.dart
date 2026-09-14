@@ -20,10 +20,7 @@ import '../../domain/search.dart';
 ///  * terminal states arrive as `luxestays://` deep links which the
 ///    `NavigationDelegate` intercepts and never actually navigates to.
 class SynxisBookingEngine {
-  const SynxisBookingEngine({
-    required this.baseUrl,
-    required this.chainId,
-  });
+  const SynxisBookingEngine({required this.baseUrl, required this.chainId});
 
   final String baseUrl;
   final String chainId;
@@ -59,16 +56,16 @@ class SynxisBookingEngine {
           'childages': query.occupancy.children.join(','),
         'currency': query.currency,
         'locale': locale,
-        if (roomTypeCode != null) 'room': roomTypeCode,
-        if (ratePlanCode != null) 'rate': ratePlanCode,
+        'room': ?roomTypeCode,
+        'rate': ?ratePlanCode,
         if (query.promotionCode != null) 'promo': query.promotionCode!,
         if (query.corporateCode != null) 'corporate': query.corporateCode!,
-        if (membershipNumber != null) 'member': membershipNumber,
+        'member': ?membershipNumber,
         // Tells the web layer it is embedded, so it renders without its own
         // chrome and enables the JS bridge handshake.
         'embedded': 'true',
         'returnUrl': '$deepLinkScheme://$hostBookingComplete',
-        if (sessionToken != null) 'st': sessionToken,
+        'st': ?sessionToken,
       },
     );
   }

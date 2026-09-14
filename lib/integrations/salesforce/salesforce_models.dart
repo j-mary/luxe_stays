@@ -66,7 +66,8 @@ class SalesforceMemberDto {
       // Salesforce exposes these either on the member or on the associated
       // contact, depending on how the org shapes the Connect response.
       email: JsonRead.stringOrNull(json, 'email') ?? _contact(json, 'email'),
-      phone: JsonRead.stringOrNull(json, 'mobilePhone') ??
+      phone:
+          JsonRead.stringOrNull(json, 'mobilePhone') ??
           JsonRead.stringOrNull(json, 'phone') ??
           _contact(json, 'mobilePhone'),
       enrollmentDate: JsonRead.dateOrNull(json, 'enrollmentDate'),
@@ -106,8 +107,9 @@ class SalesforceMemberDto {
     return null;
   }
 
-  LoyaltyMember toDomain(
-      {List<LoyaltyVoucher> vouchers = const <LoyaltyVoucher>[]}) {
+  LoyaltyMember toDomain({
+    List<LoyaltyVoucher> vouchers = const <LoyaltyVoucher>[],
+  }) {
     return LoyaltyMember(
       memberId: memberId,
       membershipNumber: membershipNumber,
@@ -146,11 +148,13 @@ class SalesforceVoucherDto {
     return SalesforceVoucherDto(
       id: JsonRead.string(json, 'voucherId'),
       code: JsonRead.stringOrNull(json, 'voucherCode') ?? '',
-      name: JsonRead.stringOrNull(json, 'voucherDefinitionName') ??
+      name:
+          JsonRead.stringOrNull(json, 'voucherDefinitionName') ??
           JsonRead.stringOrNull(json, 'name') ??
           'Reward',
       type: JsonRead.stringOrNull(json, 'type') ?? 'Discount',
-      expirationDate: JsonRead.dateOrNull(json, 'expirationDate') ??
+      expirationDate:
+          JsonRead.dateOrNull(json, 'expirationDate') ??
           DateTime.now().add(const Duration(days: 365)),
       status: JsonRead.stringOrNull(json, 'status') ?? 'Issued',
       discountPercent: JsonRead.doubleOrNull(json, 'discountPercent'),
@@ -191,8 +195,9 @@ class SalesforceVoucherDto {
         'cancelled' || 'canceled' => VoucherStatus.cancelled,
         _ => VoucherStatus.issued,
       },
-      minimumSpendMinor:
-          minimumSpend == null ? null : (minimumSpend! * 100).round(),
+      minimumSpendMinor: minimumSpend == null
+          ? null
+          : (minimumSpend! * 100).round(),
     );
   }
 }
@@ -230,20 +235,20 @@ class SalesforceLedgerEntryDto {
   final String? hotelName;
 
   PointsLedgerEntry toDomain() => PointsLedgerEntry(
-        id: id,
-        occurredAt: eventDate,
-        points: points,
-        description: description,
-        type: switch (eventType.toLowerCase()) {
-          'redemption' => LedgerEntryType.redemption,
-          'expiration' || 'expiry' => LedgerEntryType.expiry,
-          'adjustment' => LedgerEntryType.adjustment,
-          'tierbonus' || 'tier_bonus' => LedgerEntryType.tierBonus,
-          _ => LedgerEntryType.accrual,
-        },
-        bookingReference: journalReference,
-        hotelName: hotelName,
-      );
+    id: id,
+    occurredAt: eventDate,
+    points: points,
+    description: description,
+    type: switch (eventType.toLowerCase()) {
+      'redemption' => LedgerEntryType.redemption,
+      'expiration' || 'expiry' => LedgerEntryType.expiry,
+      'adjustment' => LedgerEntryType.adjustment,
+      'tierbonus' || 'tier_bonus' => LedgerEntryType.tierBonus,
+      _ => LedgerEntryType.accrual,
+    },
+    bookingReference: journalReference,
+    hotelName: hotelName,
+  );
 }
 
 /// Result of running a loyalty program process (accrual or redemption).
@@ -259,10 +264,13 @@ class SalesforceProcessResult {
 
   factory SalesforceProcessResult.fromJson(Map<String, Object?> json) {
     final Object outputs = json['outputParameters'] ?? json;
-    final Map<String, Object?> out =
-        JsonRead.object(outputs, 'outputParameters');
+    final Map<String, Object?> out = JsonRead.object(
+      outputs,
+      'outputParameters',
+    );
     return SalesforceProcessResult(
-      status: JsonRead.stringOrNull(json, 'status') ??
+      status:
+          JsonRead.stringOrNull(json, 'status') ??
           JsonRead.stringOrNull(out, 'status') ??
           'Success',
       transactionJournalId:

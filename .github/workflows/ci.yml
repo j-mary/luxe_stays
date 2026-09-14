@@ -1,16 +1,4 @@
-# LuxeStays CI.
-#
-# Three jobs, ordered by how fast they fail:
-#   analyze  - format + static analysis + tests, on every push (~2 min)
-#   contract - boots the mock back end and asserts the vendor contracts still
-#              parse. This is the job that catches "SynXis changed a field"
-#              before it reaches a device.
-#   build    - release artefacts, only on main and tags.
-#
-# Signing secrets are referenced but never printed; the Android keystore and the
-# iOS App Store Connect key arrive as base64 secrets and are written to a
-# RUNNER_TEMP path that the runner discards.
-
+# Pinned demo CI: local contract checks do not certify vendor compatibility.
 name: CI
 
 on:
@@ -20,7 +8,7 @@ on:
   pull_request:
 
 env:
-  FLUTTER_VERSION: "3.35.3"
+  FLUTTER_VERSION: "3.47.4"
 
 jobs:
   analyze:
@@ -41,11 +29,8 @@ jobs:
       - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed lib test integration_test tool
 
-      # --fatal-warnings, not --fatal-infos: deprecation hints differ between
-      # Flutter minor versions, and a CI that fails because the SDK deprecated a
-      # constructor argument last week trains people to ignore it.
       - name: Static analysis
-        run: flutter analyze --fatal-warnings
+        run: flutter analyze --fatal-infos
 
       - name: Unit & widget tests
         run: flutter test --coverage --reporter expanded
@@ -57,7 +42,7 @@ jobs:
           path: coverage/lcov.info
 
   contract:
-    name: Vendor contract check
+    name: Local mock contract check
     runs-on: ubuntu-latest
     needs: analyze
     steps:
@@ -79,15 +64,11 @@ jobs:
             sleep 1
           done
 
-      # Hits every vendor the app depends on and fails if a response no longer
-      # matches the shape the client decodes. Pointed at a real sandbox (SynXis
-      # CERT, a Salesforce scratch org, the CMS preview environment) this is the
-      # early-warning system for a breaking upstream change.
       - name: Contract smoke
         run: bash tool/contract_check.sh http://localhost:8080
 
   build:
-    name: Build release artefacts
+    name: Build unsigned demo artefacts
     runs-on: macos-latest
     needs: [analyze, contract]
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
@@ -102,36 +83,16 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Decode Android keystore
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
-          fi
+      - name: Build Android demo APK
+        run: flutter build apk --debug
 
-      - name: Build Android App Bundle
-        run: |
-          flutter build appbundle --release \
-            --dart-define=FLAVOR=prod \
-            --dart-define=API_BASE_URL=${{ vars.PROD_API_BASE_URL }} \
-            --dart-define=SYNXIS_BASE_URL=${{ vars.PROD_SYNXIS_BASE_URL }} \
-            --dart-define=SALESFORCE_BASE_URL=${{ vars.PROD_SALESFORCE_BASE_URL }} \
-            --dart-define=CMS_BASE_URL=${{ vars.PROD_CMS_BASE_URL }} \
-            --dart-define=LEONARDO_BASE_URL=${{ vars.PROD_LEONARDO_BASE_URL }} \
-            --build-number=${{ github.run_number }}
-
-      - name: Build iOS (no codesign on PR-less runs without secrets)
-        run: |
-          flutter build ipa --release --no-codesign \
-            --dart-define=FLAVOR=prod \
-            --build-number=${{ github.run_number }} || \
-          flutter build ios --release --no-codesign
+      - name: Build iOS simulator demo
+        run: flutter build ios --simulator --debug
 
       - uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts
+          name: demo-builds
           path: |
-            build/app/outputs/bundle/release/*.aab
-            build/ios/ipa/*.ipa
-          if-no-files-found: warn
+            build/app/outputs/flutter-apk/*.apk
+            build/ios/iphonesimulator/*.app
+          if-no-files-found: error

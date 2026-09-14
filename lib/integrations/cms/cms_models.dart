@@ -35,8 +35,10 @@ class ContentfulResponse {
       }
       final Map<String, Map<String, Object?>> out =
           <String, Map<String, Object?>>{};
-      for (final Map<String, Object?> item
-          in JsonRead.objectList(list, 'includes')) {
+      for (final Map<String, Object?> item in JsonRead.objectList(
+        list,
+        'includes',
+      )) {
         final Map<String, Object?> sys = JsonRead.object(item['sys'], 'sys');
         out[JsonRead.string(sys, 'id')] = item;
       }
@@ -172,13 +174,13 @@ class CmsHotelContent {
   final String locale;
 
   HotelEditorial toEditorial() => HotelEditorial(
-        headline: headline,
-        body: body,
-        signatureExperience: signatureExperience,
-        neighbourhood: neighbourhood,
-        updatedAt: updatedAt,
-        locale: locale,
-      );
+    headline: headline,
+    body: body,
+    signatureExperience: signatureExperience,
+    neighbourhood: neighbourhood,
+    updatedAt: updatedAt,
+    locale: locale,
+  );
 
   static List<String> _stringList(Object? value) {
     if (value is List) {
@@ -274,11 +276,11 @@ class CmsPage {
   });
 
   factory CmsPage.fromFields(Map<String, Object?> fields) => CmsPage(
-        slug: JsonRead.stringOrNull(fields, 'slug') ?? '',
-        title: JsonRead.stringOrNull(fields, 'title') ?? '',
-        url: JsonRead.stringOrNull(fields, 'url') ?? '',
-        updatedAt: JsonRead.dateOrNull(fields, 'updatedAt'),
-      );
+    slug: JsonRead.stringOrNull(fields, 'slug') ?? '',
+    title: JsonRead.stringOrNull(fields, 'title') ?? '',
+    url: JsonRead.stringOrNull(fields, 'url') ?? '',
+    updatedAt: JsonRead.dateOrNull(fields, 'updatedAt'),
+  );
 
   final String slug;
   final String title;

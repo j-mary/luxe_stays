@@ -51,3 +51,10 @@ test/failures/
 
 # OS noise
 .DS_Store
+
+# FVM SDK cache (the version pin .fvmrc is committed)
+.fvm/
+
+16-JOB-REQUIREMENTS.md
+17-IMPLEMENTATION-REPORT.md
+LuxeStays-Build-Handbook.html

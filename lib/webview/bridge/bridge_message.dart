@@ -47,8 +47,9 @@ class BridgeMessage {
       if (decoded is! Map<String, Object?>) {
         return null;
       }
-      final BridgeMessageType? type =
-          BridgeMessageType.fromWire(decoded['type']?.toString());
+      final BridgeMessageType? type = BridgeMessageType.fromWire(
+        decoded['type']?.toString(),
+      );
       if (type == null) {
         return null;
       }
@@ -68,12 +69,12 @@ class BridgeMessage {
   }
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'v': version,
-        'id': id,
-        'type': type.wire,
-        'payload': payload,
-        if (replyTo != null) 'replyTo': replyTo,
-      };
+    'v': version,
+    'id': id,
+    'type': type.wire,
+    'payload': payload,
+    if (replyTo != null) 'replyTo': replyTo,
+  };
 
   String encode() => jsonEncode(toJson());
 
@@ -163,17 +164,16 @@ enum BridgeMessageType {
   /// Messages the host will act on. Anything else arriving from the page is
   /// dropped - an allowlist, not a denylist.
   bool get isInbound => switch (this) {
-        BridgeMessageType.ready ||
-        BridgeMessageType.authRequest ||
-        BridgeMessageType.paymentResult ||
-        BridgeMessageType.bookingResult ||
-        BridgeMessageType.navigate ||
-        BridgeMessageType.close ||
-        BridgeMessageType.resize ||
-        BridgeMessageType.analytics ||
-        BridgeMessageType.log ||
-        BridgeMessageType.error =>
-          true,
-        _ => false,
-      };
+    BridgeMessageType.ready ||
+    BridgeMessageType.authRequest ||
+    BridgeMessageType.paymentResult ||
+    BridgeMessageType.bookingResult ||
+    BridgeMessageType.navigate ||
+    BridgeMessageType.close ||
+    BridgeMessageType.resize ||
+    BridgeMessageType.analytics ||
+    BridgeMessageType.log ||
+    BridgeMessageType.error => true,
+    _ => false,
+  };
 }

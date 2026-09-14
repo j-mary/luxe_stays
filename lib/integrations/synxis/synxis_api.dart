@@ -15,18 +15,12 @@ import 'synxis_models.dart';
 /// CRS, `SynxisApi` + `SynxisMappers` is the blast radius.
 ///
 /// ### Wire format
-/// SynXis's REST contract is distributed to certified partners rather than
-/// published openly, so the request/response shapes below are modelled on the
-/// SynXis Enterprise Platform / OTA_HotelAvail semantics and are matched
-/// exactly by `tool/mock_server`. Swapping in the real contract means editing
-/// this file and `synxis_models.dart` only - see
-/// `docs/03-INTEGRATION-SYNXIS.md`.
+/// These endpoints and PascalCase payloads are LuxeStays demo BFF assumptions.
+/// They are NOT the public SynXis Property Hub Reservation API. That API has a
+/// separately documented retrieval contract, implemented by property_hub_routes.
+/// Never point this client at a real SynXis origin. See docs/15-API-AUDIT.md.
 class SynxisApi {
-  SynxisApi({
-    required ApiClient client,
-    required String chainId,
-  })  : _client = client,
-        _chainId = chainId;
+  SynxisApi({required this._client, required this._chainId});
 
   final ApiClient _client;
   final String _chainId;
@@ -49,9 +43,10 @@ class SynxisApi {
       cancelToken: cancelToken,
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        return JsonRead.objectList(root['Hotels'], 'Hotels')
-            .map(SynxisHotelDto.fromJson)
-            .toList(growable: false);
+        return JsonRead.objectList(
+          root['Hotels'],
+          'Hotels',
+        ).map(SynxisHotelDto.fromJson).toList(growable: false);
       },
     );
   }
@@ -60,7 +55,7 @@ class SynxisApi {
   ///
   /// This is the expensive call: the CRS prices every rate plan for every
   /// requested property, per night. It is POSTed (not GET) because the request
-  /// carries child ages and rate-access codes, and because SynXis treats it as
+  /// carries child ages and rate-access codes, and because this demo models it as
   /// a shopping transaction rather than a cacheable resource.
   Future<Result<SynxisAvailabilityDto>> availability({
     required List<String> hotelIds,
@@ -88,7 +83,7 @@ class SynxisApi {
         if (query.corporateCode != null) 'CorporateCode': query.corporateCode,
         // Passing the membership number is what makes SynXis return the
         // member-only rate plans alongside the public ones.
-        if (membershipNumber != null) 'MembershipNumber': membershipNumber,
+        'MembershipNumber': ?membershipNumber,
         'RatePlanFilter': <String, Object?>{
           'RefundableOnly': query.filters.freeCancellationOnly,
           'MemberOnly': query.filters.memberRatesOnly,
@@ -159,10 +154,7 @@ class SynxisApi {
   }) {
     return _client.getJson<SynxisReservationDto>(
       '/v1/api/reservations/$confirmationNumber',
-      query: <String, Object?>{
-        'chainId': _chainId,
-        if (lastName != null) 'lastName': lastName,
-      },
+      query: <String, Object?>{'chainId': _chainId, 'lastName': ?lastName},
       cancelToken: cancelToken,
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
@@ -201,9 +193,10 @@ class SynxisApi {
       cancelToken: cancelToken,
       decode: (Object? json) {
         final Map<String, Object?> root = JsonRead.object(json, 'root');
-        return JsonRead.objectList(root['RoomTypes'], 'RoomTypes')
-            .map(SynxisRoomTypeDto.fromJson)
-            .toList(growable: false);
+        return JsonRead.objectList(
+          root['RoomTypes'],
+          'RoomTypes',
+        ).map(SynxisRoomTypeDto.fromJson).toList(growable: false);
       },
     );
   }

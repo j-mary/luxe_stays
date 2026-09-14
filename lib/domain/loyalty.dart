@@ -20,41 +20,41 @@ enum LoyaltyTier {
 
   /// Nights required in a membership year to reach the tier.
   int get qualifyingNights => switch (this) {
-        LoyaltyTier.classic => 0,
-        LoyaltyTier.silver => 10,
-        LoyaltyTier.gold => 25,
-        LoyaltyTier.platinum => 50,
-      };
+    LoyaltyTier.classic => 0,
+    LoyaltyTier.silver => 10,
+    LoyaltyTier.gold => 25,
+    LoyaltyTier.platinum => 50,
+  };
 
   /// Points per unit of eligible spend multiplier.
   double get earnMultiplier => switch (this) {
-        LoyaltyTier.classic => 1.0,
-        LoyaltyTier.silver => 1.25,
-        LoyaltyTier.gold => 1.5,
-        LoyaltyTier.platinum => 2.0,
-      };
+    LoyaltyTier.classic => 1.0,
+    LoyaltyTier.silver => 1.25,
+    LoyaltyTier.gold => 1.5,
+    LoyaltyTier.platinum => 2.0,
+  };
 
   /// The member-rate discount the tier unlocks, as a percentage.
   double get memberRateDiscountPercent => switch (this) {
-        LoyaltyTier.classic => 5,
-        LoyaltyTier.silver => 8,
-        LoyaltyTier.gold => 12,
-        LoyaltyTier.platinum => 15,
-      };
+    LoyaltyTier.classic => 5,
+    LoyaltyTier.silver => 8,
+    LoyaltyTier.gold => 12,
+    LoyaltyTier.platinum => 15,
+  };
 
   String get label => switch (this) {
-        LoyaltyTier.classic => 'Classic',
-        LoyaltyTier.silver => 'Silver',
-        LoyaltyTier.gold => 'Gold',
-        LoyaltyTier.platinum => 'Platinum',
-      };
+    LoyaltyTier.classic => 'Classic',
+    LoyaltyTier.silver => 'Silver',
+    LoyaltyTier.gold => 'Gold',
+    LoyaltyTier.platinum => 'Platinum',
+  };
 
   LoyaltyTier? get next => switch (this) {
-        LoyaltyTier.classic => LoyaltyTier.silver,
-        LoyaltyTier.silver => LoyaltyTier.gold,
-        LoyaltyTier.gold => LoyaltyTier.platinum,
-        LoyaltyTier.platinum => null,
-      };
+    LoyaltyTier.classic => LoyaltyTier.silver,
+    LoyaltyTier.silver => LoyaltyTier.gold,
+    LoyaltyTier.gold => LoyaltyTier.platinum,
+    LoyaltyTier.platinum => null,
+  };
 
   /// Salesforce stores the tier as a picklist string on `LoyaltyMemberTier`.
   static LoyaltyTier fromSalesforce(String? raw) =>
@@ -208,11 +208,10 @@ class LoyaltyVoucher {
   }
 
   String get valueLabel => switch (type) {
-        VoucherType.percentOff =>
-          '${(percentOff ?? 0).toStringAsFixed(0)}% off',
-        VoucherType.fixedAmount =>
-          '${Money(valueMinor ?? 0, currency).format()} off',
-      };
+    VoucherType.percentOff => '${(percentOff ?? 0).toStringAsFixed(0)}% off',
+    VoucherType.fixedAmount =>
+      '${Money(valueMinor ?? 0, currency).format()} off',
+  };
 }
 
 enum VoucherType { percentOff, fixedAmount }
@@ -288,17 +287,15 @@ class LoyaltyProgramRules {
 
   /// How many points the guest may burn on a given basket: capped by balance,
   /// by the basket value, and snapped to the redemption increment.
-  int maxRedeemablePoints({
-    required int balance,
-    required Money basketTotal,
-  }) {
+  int maxRedeemablePoints({required int balance, required Money basketTotal}) {
     if (balance < minimumRedemption) {
       return 0;
     }
     final int pointsForFullBasket =
         basketTotal.minorUnits ~/ pointValueMinorUnits;
-    final int capped =
-        balance < pointsForFullBasket ? balance : pointsForFullBasket;
+    final int capped = balance < pointsForFullBasket
+        ? balance
+        : pointsForFullBasket;
     final int snapped = (capped ~/ redemptionIncrement) * redemptionIncrement;
     return snapped < minimumRedemption ? 0 : snapped;
   }

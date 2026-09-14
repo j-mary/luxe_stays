@@ -46,8 +46,10 @@ Map<String, Object?> _offerJson({
 void main() {
   group('SynxisOfferDto → RoomOffer', () {
     test('maps nightly rates, taxes and totals in minor units', () {
-      final RoomOffer offer =
-          SynxisOfferDto.fromJson(_offerJson(), 'H-PAR-001').toDomain();
+      final RoomOffer offer = SynxisOfferDto.fromJson(
+        _offerJson(),
+        'H-PAR-001',
+      ).toDomain();
 
       expect(offer.hotelId, 'H-PAR-001');
       expect(offer.stay.nights, 2);
@@ -61,35 +63,48 @@ void main() {
     });
 
     test('derives a deterministic offer id so carts de-duplicate', () {
-      final String a =
-          SynxisOfferDto.fromJson(_offerJson(), 'H-PAR-001').offerId;
-      final String b =
-          SynxisOfferDto.fromJson(_offerJson(), 'H-PAR-001').offerId;
+      final String a = SynxisOfferDto.fromJson(
+        _offerJson(),
+        'H-PAR-001',
+      ).offerId;
+      final String b = SynxisOfferDto.fromJson(
+        _offerJson(),
+        'H-PAR-001',
+      ).offerId;
       expect(a, b);
-      expect(a, 'H-PAR-001:DLX:BARBB:2026-11-12');
+      expect(a, startsWith('H-PAR-001:DLX:BARBB:2026-11-12:'));
+      final Map<String, Object?> changed = _offerJson()
+        ..['Departure'] = '2026-11-16';
+      expect(SynxisOfferDto.fromJson(changed, 'H-PAR-001').offerId, isNot(a));
+      final Map<String, Object?> children = _offerJson()..['ChildAges'] = [7];
+      expect(SynxisOfferDto.fromJson(children, 'H-PAR-001').offerId, isNot(a));
     });
 
     test('non-refundable rates carry the non-refundable policy', () {
-      final RoomOffer offer =
-          SynxisOfferDto.fromJson(_offerJson(refundable: false), 'H-PAR-001')
-              .toDomain();
+      final RoomOffer offer = SynxisOfferDto.fromJson(
+        _offerJson(refundable: false),
+        'H-PAR-001',
+      ).toDomain();
       expect(offer.cancellationPolicy.isNonRefundable, isTrue);
       expect(offer.cancellationPolicy.isFreeCancellation, isFalse);
       expect(offer.cancellationPolicy.shortLabel, 'Non-refundable');
     });
 
     test('member rates expose the saving against the public total', () {
-      final RoomOffer offer =
-          SynxisOfferDto.fromJson(_offerJson(memberRate: true), 'H-PAR-001')
-              .toDomain();
+      final RoomOffer offer = SynxisOfferDto.fromJson(
+        _offerJson(memberRate: true),
+        'H-PAR-001',
+      ).toDomain();
       expect(offer.isMemberRate, isTrue);
       expect(offer.savings, isNotNull);
       expect(offer.savings!.minorUnits, 78000 - 68400);
     });
 
     test('flags low inventory', () {
-      final RoomOffer offer =
-          SynxisOfferDto.fromJson(_offerJson(), 'H-PAR-001').toDomain();
+      final RoomOffer offer = SynxisOfferDto.fromJson(
+        _offerJson(),
+        'H-PAR-001',
+      ).toDomain();
       expect(offer.isLastRooms, isTrue);
     });
 
@@ -110,59 +125,66 @@ void main() {
 
   group('SynxisAvailabilityDto', () {
     test('groups offers by hotel and surfaces warnings', () {
-      final SynxisAvailabilityDto dto =
-          SynxisAvailabilityDto.fromJson(<String, Object?>{
-        'HotelAvailability': <Object?>[
-          <String, Object?>{
-            'HotelId': 'H-PAR-001',
-            'Offers': <Object?>[_offerJson()],
-          },
-          <String, Object?>{
-            'HotelId': 'H-KYO-001',
-            'Offers': <Object?>[_offerJson(), _offerJson(refundable: false)],
-          },
-        ],
-        'Warnings': <Object?>['Restricted rate hidden'],
-      });
+      final SynxisAvailabilityDto dto = SynxisAvailabilityDto.fromJson(
+        <String, Object?>{
+          'HotelAvailability': <Object?>[
+            <String, Object?>{
+              'HotelId': 'H-PAR-001',
+              'Offers': <Object?>[_offerJson()],
+            },
+            <String, Object?>{
+              'HotelId': 'H-KYO-001',
+              'Offers': <Object?>[_offerJson(), _offerJson(refundable: false)],
+            },
+          ],
+          'Warnings': <Object?>['Restricted rate hidden'],
+        },
+      );
 
-      expect(dto.offersByHotelId.keys,
-          containsAll(<String>['H-PAR-001', 'H-KYO-001']));
+      expect(
+        dto.offersByHotelId.keys,
+        containsAll(<String>['H-PAR-001', 'H-KYO-001']),
+      );
       expect(dto.offersByHotelId['H-KYO-001']!.length, 2);
       expect(dto.warnings.single, 'Restricted rate hidden');
     });
   });
 
   group('SynxisReservationRequest', () {
-    test('sends the quote token and expected total so the CRS can re-price',
-        () {
-      final RoomOffer offer =
-          SynxisOfferDto.fromJson(_offerJson(), 'H-PAR-001').toDomain();
-      final Map<String, Object?> json = SynxisReservationRequest(
-        hotelId: 'H-PAR-001',
-        offer: offer,
-        guest: const GuestDetails(
-          firstName: 'Amara',
-          lastName: 'Okonkwo',
-          email: 'amara@example.com',
-          phone: '+2348012345678',
-        ),
-        paymentIntentId: 'pi_123',
-        membershipNumber: 'LS-100042',
-        pointsRedeemed: 2000,
-      ).toJson(chainId: '12345');
+    test(
+      'sends the quote token and expected total so the CRS can re-price',
+      () {
+        final RoomOffer offer = SynxisOfferDto.fromJson(
+          _offerJson(),
+          'H-PAR-001',
+        ).toDomain();
+        final Map<String, Object?> json = SynxisReservationRequest(
+          hotelId: 'H-PAR-001',
+          offer: offer,
+          guest: const GuestDetails(
+            firstName: 'Amara',
+            lastName: 'Okonkwo',
+            email: 'amara@example.com',
+            phone: '+2348012345678',
+          ),
+          paymentIntentId: 'pi_123',
+          membershipNumber: 'LS-100042',
+          pointsRedeemed: 2000,
+        ).toJson(chainId: '12345');
 
-      final Map<String, Object?> roomStay =
-          json['RoomStay']! as Map<String, Object?>;
-      expect(roomStay['QuoteToken'], 'qt_abc');
-      expect(roomStay['ExpectedTotal'], 684.0);
-      final Map<String, Object?> loyalty =
-          json['Loyalty']! as Map<String, Object?>;
-      expect(loyalty['MembershipNumber'], 'LS-100042');
-      expect(loyalty['PointsRedeemed'], 2000);
-      // The CRS must never receive card data.
-      final Map<String, Object?> payment =
-          json['Payment']! as Map<String, Object?>;
-      expect(payment.keys, <String>['IntentId', 'Type']);
-    });
+        final Map<String, Object?> roomStay =
+            json['RoomStay']! as Map<String, Object?>;
+        expect(roomStay['QuoteToken'], 'qt_abc');
+        expect(roomStay['ExpectedTotal'], 684.0);
+        final Map<String, Object?> loyalty =
+            json['Loyalty']! as Map<String, Object?>;
+        expect(loyalty['MembershipNumber'], 'LS-100042');
+        expect(loyalty['PointsRedeemed'], 2000);
+        // The CRS must never receive card data.
+        final Map<String, Object?> payment =
+            json['Payment']! as Map<String, Object?>;
+        expect(payment.keys, <String>['IntentId', 'Type']);
+      },
+    );
   });
 }

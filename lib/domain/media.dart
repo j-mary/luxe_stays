@@ -51,8 +51,10 @@ enum MediaCategory {
   /// Leonardo's `category` vocabulary is free-ish text that varies by chain,
   /// so we normalise aggressively rather than trusting an exact match.
   static MediaCategory fromLeonardo(String? raw) {
-    final String key =
-        (raw ?? '').toLowerCase().replaceAll(RegExp(r'[\s_\-]'), '');
+    final String key = (raw ?? '').toLowerCase().replaceAll(
+      RegExp(r'[\s_\-]'),
+      '',
+    );
     switch (key) {
       case 'exterior':
       case 'hotelexterior':
@@ -86,17 +88,17 @@ enum MediaCategory {
   }
 
   String get label => switch (this) {
-        MediaCategory.exterior => 'Exterior',
-        MediaCategory.lobby => 'Lobby',
-        MediaCategory.guestRoom => 'Rooms',
-        MediaCategory.suite => 'Suites',
-        MediaCategory.dining => 'Dining',
-        MediaCategory.spa => 'Spa',
-        MediaCategory.pool => 'Pool',
-        MediaCategory.meeting => 'Meetings',
-        MediaCategory.destination => 'Destination',
-        MediaCategory.unknown => 'Gallery',
-      };
+    MediaCategory.exterior => 'Exterior',
+    MediaCategory.lobby => 'Lobby',
+    MediaCategory.guestRoom => 'Rooms',
+    MediaCategory.suite => 'Suites',
+    MediaCategory.dining => 'Dining',
+    MediaCategory.spa => 'Spa',
+    MediaCategory.pool => 'Pool',
+    MediaCategory.meeting => 'Meetings',
+    MediaCategory.destination => 'Destination',
+    MediaCategory.unknown => 'Gallery',
+  };
 }
 
 /// Where the pixels came from. Generative assets are labelled in the UI - a
@@ -114,12 +116,21 @@ class MediaTransform {
     this.fit = MediaFit.cover,
   });
 
-  static const MediaTransform thumbnail =
-      MediaTransform(width: 320, height: 214, quality: 70);
-  static const MediaTransform card =
-      MediaTransform(width: 720, height: 480, quality: 78);
-  static const MediaTransform hero =
-      MediaTransform(width: 1440, height: 900, quality: 82);
+  static const MediaTransform thumbnail = MediaTransform(
+    width: 320,
+    height: 214,
+    quality: 70,
+  );
+  static const MediaTransform card = MediaTransform(
+    width: 720,
+    height: 480,
+    quality: 78,
+  );
+  static const MediaTransform hero = MediaTransform(
+    width: 1440,
+    height: 900,
+    quality: 82,
+  );
 
   final int? width;
   final int? height;

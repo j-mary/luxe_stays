@@ -36,12 +36,12 @@ class AppPanel extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
     return Padding(
       padding: margin,
-      child: Container(
+      child: Material(
         clipBehavior: clipBehavior,
-        decoration: BoxDecoration(
-          color: color ?? colors.surface,
+        color: color ?? colors.surface,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(2),
-          border: Border.all(color: colors.outlineVariant),
+          side: BorderSide(color: colors.outlineVariant),
         ),
         child: child,
       ),

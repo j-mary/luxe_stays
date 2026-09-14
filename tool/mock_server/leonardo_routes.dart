@@ -17,8 +17,10 @@ import 'support.dart';
 Router leonardoRouter() {
   final Router router = Router();
 
-  router.get('/v1/properties/<hotelId>/media',
-      (Request request, String hotelId) {
+  router.get('/v1/properties/<hotelId>/media', (
+    Request request,
+    String hotelId,
+  ) {
     final String origin = originOf(request);
     final Map<String, String> q = request.url.queryParameters;
     final String? roomTypeCode = q['roomTypeCode'];
@@ -65,8 +67,8 @@ Router leonardoRouter() {
             roomTypeCodes: cat == 'Guest Room'
                 ? <String>['DLX']
                 : cat == 'Suite'
-                    ? <String>['STE', 'JRSTE']
-                    : const <String>[],
+                ? <String>['STE', 'JRSTE']
+                : const <String>[],
           ),
         );
       }
@@ -93,8 +95,8 @@ Router leonardoRouter() {
   /// Renders the actual bitmap.
   router.get('/img/<name>', (Request request, String name) {
     final Map<String, String> q = request.url.queryParameters;
-    final int width = int.tryParse(q['w'] ?? '') ?? 800;
-    final int height = int.tryParse(q['h'] ?? '') ?? 533;
+    final int width = (int.tryParse(q['w'] ?? '') ?? 800).clamp(1, 1600);
+    final int height = (int.tryParse(q['h'] ?? '') ?? 533).clamp(1, 1600);
     final Uint8List bytes = gradientPng(
       width: width,
       height: height,
@@ -108,7 +110,8 @@ Router leonardoRouter() {
         // Media is immutable per rendition, so it is safe to cache hard. This
         // is what makes the app's image traffic collapse on a second launch.
         'cache-control': 'public, max-age=86400',
-        'x-rendition': '${width}x$height q=${q['q'] ?? '-'} '
+        'x-rendition':
+            '${width}x$height q=${q['q'] ?? '-'} '
             'fmt=${q['fmt'] ?? '-'}',
       },
     );
@@ -166,10 +169,10 @@ Router leonardoAiRouter() {
     final String origin = originOf(request);
     final DateTime? started = jobs[id];
     if (started == null) {
-      return jsonResponse(
-        <String, Object?>{'error': 'Unknown generation', 'code': 'NOT_FOUND'},
-        status: 404,
-      );
+      return jsonResponse(<String, Object?>{
+        'error': 'Unknown generation',
+        'code': 'NOT_FOUND',
+      }, status: 404);
     }
     // Generative image APIs are slow; completing only after ~3 s keeps the
     // client's polling and timeout logic honest.

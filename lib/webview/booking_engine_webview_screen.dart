@@ -66,14 +66,13 @@ class BookingEngineWebViewScreen extends ConsumerWidget {
           'Your booking is not finished. Leave the booking page?',
       handlers: <BridgeMessageType, BridgeHandler>{
         BridgeMessageType.bookingResult: (BridgeMessage message) {
-          final String status =
-              (message.stringField('status') ?? '').toLowerCase();
+          final String status = (message.stringField('status') ?? '')
+              .toLowerCase();
           finish(
             BookingEngineOutcome(
               type: switch (status) {
                 'completed' ||
-                'confirmed' =>
-                  BookingEngineOutcomeType.completed,
+                'confirmed' => BookingEngineOutcomeType.completed,
                 'cancelled' || 'canceled' => BookingEngineOutcomeType.cancelled,
                 _ => BookingEngineOutcomeType.failed,
               },
@@ -87,8 +86,9 @@ class BookingEngineWebViewScreen extends ConsumerWidget {
         },
       },
       onDeepLink: (Uri deepLink) {
-        final BookingEngineOutcome? outcome =
-            SynxisBookingEngine.parseDeepLink(deepLink);
+        final BookingEngineOutcome? outcome = SynxisBookingEngine.parseDeepLink(
+          deepLink,
+        );
         if (outcome == null) {
           return false;
         }

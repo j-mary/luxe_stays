@@ -59,16 +59,16 @@ class SessionController extends Notifier<SessionState> {
   /// downstream keys off it.
   Future<void> signIn(String membershipNumber) async {
     state = state.copyWith(isLoading: true, clearFailure: true);
-    final SalesforceRepository repository =
-        ref.read(salesforceRepositoryProvider);
-    final Result<LoyaltyMemberView> result =
-        await repository.memberView(membershipNumber);
+    final SalesforceRepository repository = ref.read(
+      salesforceRepositoryProvider,
+    );
+    final Result<LoyaltyMemberView> result = await repository.memberView(
+      membershipNumber,
+    );
 
     state = result.fold<SessionState>(
-      (LoyaltyMemberView view) => SessionState(
-        member: view.member,
-        ledger: view.ledger,
-      ),
+      (LoyaltyMemberView view) =>
+          SessionState(member: view.member, ledger: view.ledger),
       (Failure failure) => state.copyWith(isLoading: false, failure: failure),
     );
   }

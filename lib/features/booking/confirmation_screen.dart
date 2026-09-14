@@ -31,8 +31,9 @@ class ConfirmationScreen extends ConsumerWidget {
           message: 'This booking is no longer in progress.',
           icon: Icons.receipt_long_outlined,
           action: FilledButton(
-            onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
-                Routes.search, (Route<void> r) => false),
+            onPressed: () => Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil(Routes.search, (Route<void> r) => false),
             child: const Text('Back to search'),
           ),
         ),
@@ -144,8 +145,9 @@ class _ReservationCard extends StatelessWidget {
                 const Spacer(),
                 SelectableText(
                   reservation.confirmationNumber,
-                  style: theme.textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -208,8 +210,10 @@ class _LoyaltySummary extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                Icon(Icons.workspace_premium_rounded,
-                    color: theme.colorScheme.onPrimaryContainer),
+                Icon(
+                  Icons.workspace_premium_rounded,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'LuxeStays Rewards',
@@ -230,7 +234,7 @@ class _LoyaltySummary extends StatelessWidget {
             Text(
               outcome.loyaltyPostingDeferred
                   ? 'About ${outcome.pointsEarned} points are on their way - '
-                      'we are still confirming them with our rewards system.'
+                        'we are still confirming them with our rewards system.'
                   : '${outcome.pointsEarned} points added to your balance.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onPrimaryContainer,

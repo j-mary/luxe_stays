@@ -29,16 +29,14 @@ import '../../core/storage/token_store.dart';
 /// identical; only [tokenEndpoint] changes. See `docs/04-INTEGRATION-SALESFORCE.md`.
 class SalesforceAuthService {
   SalesforceAuthService({
-    required Dio dio,
-    required TokenStore store,
-    required AppLogger logger,
+    required this._dio,
+    required this._store,
+    required this._logger,
     required this.clientId,
     required this.redirectUri,
     required this.loginBaseUrl,
     this.scopes = const <String>['api', 'refresh_token', 'openid'],
-  })  : _dio = dio,
-        _store = store,
-        _logger = logger;
+  });
 
   final Dio _dio;
   final TokenStore _store;
@@ -63,12 +61,15 @@ class SalesforceAuthService {
   /// its SHA-256 hash travels in the authorize URL.
   static PkcePair createPkcePair() {
     final Random random = Random.secure();
-    final List<int> bytes =
-        List<int>.generate(64, (_) => random.nextInt(256), growable: false);
+    final List<int> bytes = List<int>.generate(
+      64,
+      (_) => random.nextInt(256),
+      growable: false,
+    );
     final String verifier = base64UrlEncode(bytes).replaceAll('=', '');
-    final String challenge =
-        base64UrlEncode(sha256.convert(utf8.encode(verifier)).bytes)
-            .replaceAll('=', '');
+    final String challenge = base64UrlEncode(
+      sha256.convert(utf8.encode(verifier)).bytes,
+    ).replaceAll('=', '');
     return PkcePair(verifier: verifier, challenge: challenge);
   }
 
@@ -86,7 +87,7 @@ class SalesforceAuthService {
         'code_challenge': pkce.challenge,
         'code_challenge_method': 'S256',
         'state': state,
-        if (loginHint != null) 'login_hint': loginHint,
+        'login_hint': ?loginHint,
         // Forces the account chooser rather than silently reusing a session
         // that belongs to somebody else on a shared device.
         'prompt': 'login',
