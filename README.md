@@ -40,11 +40,18 @@ make mock
 make run-emulator
 
 # Or, for an iOS simulator
-make run HOST=localhost
+make run-ios
 ```
 
+`make run-emulator` targets `emulator-5554` directly, so Flutter does not ask
+you to choose between Android, iOS and Chrome. If your emulator has another ID,
+use `make run-emulator ANDROID_DEVICE=<device-id>`. `make run-ios` selects the
+first booted iOS simulator. Run `fvm flutter devices` to see available IDs.
+The first command run with a newly installed Flutter SDK may download its
+platform artifacts once before building the app.
+
 **On Android, `localhost` is the handset, not your Mac.** Use
-`make adb-reverse` once for a USB device (then plain `make run`),
+`make adb-reverse` once for a USB device (then `make run DEVICE=<device-id>`),
 `make run-emulator` for an emulator, or `make run-lan` over Wi-Fi. Full
 setup notes and troubleshooting are in
 **[docs/13-RUNBOOK.md](docs/13-RUNBOOK.md)**.

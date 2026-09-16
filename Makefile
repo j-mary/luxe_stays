@@ -1,11 +1,18 @@
 # LuxeStays - developer entry points.
-.PHONY: help bootstrap patch-platforms mock run run-emulator run-lan adb-reverse ip \
-        analyze format test coverage integration ci clean
+.PHONY: help bootstrap patch-platforms mock run run-emulator run-ios run-lan \
+        adb-reverse ip analyze format test coverage integration \
+        integration-emulator integration-ios ci clean
 
 FLUTTER ?= fvm flutter
 DART ?= fvm dart
 FLAVOR ?= dev
 PORT   ?= 8080
+DEVICE ?=
+
+# Default device IDs for the platform-specific targets. Override either value
+# at the command line when more than one matching device is available.
+ANDROID_DEVICE ?= emulator-5554
+IOS_DEVICE ?= $(shell xcrun simctl list devices booted 2>/dev/null | sed -nE 's/.*\(([0-9A-F-]{36})\).*/\1/p' | head -1)
 
 # Where the app should look for the mock back end.
 #
@@ -18,6 +25,7 @@ PORT   ?= 8080
 # common reason the app cannot reach a mock server that is plainly running.
 HOST ?= localhost
 BASE  = http://$(HOST):$(PORT)
+DEVICE_ARG = $(if $(strip $(DEVICE)),-d $(DEVICE))
 
 DEFINES = \
 	--dart-define=FLAVOR=$(FLAVOR) \
@@ -50,12 +58,19 @@ ip: ## Print this Mac's LAN IP (for a physical device on Wi-Fi)
 	@ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || \
 		echo "could not determine a LAN IP - check System Settings > Network"
 
-run: ## Run against the mock back end (HOST=localhost; override with HOST=...)
+run: ## Run against mocks; set DEVICE=<id> to skip Flutter's device prompt
 	@echo "→ app will call $(BASE)"
-	$(FLUTTER) run $(DEFINES)
+	$(FLUTTER) run $(DEVICE_ARG) $(DEFINES)
 
 run-emulator: HOST = 10.0.2.2
-run-emulator: run ## Run on an Android emulator (uses 10.0.2.2)
+run-emulator: DEVICE = $(ANDROID_DEVICE)
+run-emulator: run ## Run on Android emulator-5554; override ANDROID_DEVICE=...
+
+run-ios: HOST = localhost
+run-ios: DEVICE = $(IOS_DEVICE)
+run-ios: ## Run on the first booted iOS simulator
+	@if [ -z "$(DEVICE)" ]; then echo 'No booted iOS simulator found.'; exit 1; fi
+	@$(MAKE) run HOST="$(HOST)" DEVICE="$(DEVICE)" FLUTTER="$(FLUTTER)" DART="$(DART)"
 
 run-lan: HOST = $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
 run-lan: run ## Run on a physical device over Wi-Fi (uses this Mac's LAN IP)
@@ -74,7 +89,17 @@ coverage: ## Unit + widget tests with coverage report
 	@echo "lcov report at coverage/lcov.info"
 
 integration: ## Integration tests (needs a booted device/emulator + mock server)
-	$(FLUTTER) test integration_test $(DEFINES)
+	$(FLUTTER) test integration_test $(DEVICE_ARG) $(DEFINES)
+
+integration-emulator: HOST = 10.0.2.2
+integration-emulator: DEVICE = $(ANDROID_DEVICE)
+integration-emulator: integration ## Integration test on Android emulator-5554
+
+integration-ios: HOST = localhost
+integration-ios: DEVICE = $(IOS_DEVICE)
+integration-ios: ## Integration test on the first booted iOS simulator
+	@if [ -z "$(DEVICE)" ]; then echo 'No booted iOS simulator found.'; exit 1; fi
+	@$(MAKE) integration HOST="$(HOST)" DEVICE="$(DEVICE)" FLUTTER="$(FLUTTER)" DART="$(DART)"
 
 ci: bootstrap format analyze test ## What CI runs
 
