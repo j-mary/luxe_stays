@@ -169,27 +169,35 @@ class SearchScreen extends ConsumerWidget {
                     itemCount: results.length,
                     itemBuilder: (BuildContext context, int index) {
                       final HotelSearchResult result = results[index];
-                      return HotelCard(
-                        result: result,
-                        onTap: () => Navigator.of(context).pushNamed(
-                          Routes.hotelDetail,
-                          arguments: HotelDetailArgs(
-                            hotelId: result.hotel.id,
-                            hotelName: result.hotel.name,
-                          ),
+                      return Padding(
+                        // Reveal the page background between catalogue-style
+                        // cards. Without this gap, the next full-bleed image
+                        // reads as part of the preceding property's details.
+                        padding: EdgeInsets.only(
+                          bottom: index == results.length - 1 ? 0 : 12,
                         ),
-                        onQuickAdd: (RoomOffer offer) {
-                          ref
-                              .read(cartProvider.notifier)
-                              .add(hotel: result.hotel, offer: offer);
-                          showAppSnackBar(
-                            context,
-                            '${result.hotel.name} added',
-                            actionLabel: 'View cart',
-                            onAction: () =>
-                                Navigator.of(context).pushNamed(Routes.cart),
-                          );
-                        },
+                        child: HotelCard(
+                          result: result,
+                          onTap: () => Navigator.of(context).pushNamed(
+                            Routes.hotelDetail,
+                            arguments: HotelDetailArgs(
+                              hotelId: result.hotel.id,
+                              hotelName: result.hotel.name,
+                            ),
+                          ),
+                          onQuickAdd: (RoomOffer offer) {
+                            ref
+                                .read(cartProvider.notifier)
+                                .add(hotel: result.hotel, offer: offer);
+                            showAppSnackBar(
+                              context,
+                              '${result.hotel.name} added',
+                              actionLabel: 'View cart',
+                              onAction: () =>
+                                  Navigator.of(context).pushNamed(Routes.cart),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),

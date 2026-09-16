@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:luxe_stays/webview/bridge/webview_bridge.dart';
 
 import '../app/providers.dart';
+import '../app/router.dart';
 import 'bridge/bridge_message.dart';
 import 'hybrid_webview.dart';
 
@@ -82,7 +83,7 @@ class _CmsContentWebViewScreenState
               if (route == null || !_allowedRoutes.contains(route)) {
                 return;
               }
-              Navigator.of(context).pushNamed(route);
+              _leaveWebViewFor(route);
             },
           },
         );
@@ -91,8 +92,35 @@ class _CmsContentWebViewScreenState
   }
 
   static const Set<String> _allowedRoutes = <String>{
-    '/search',
-    '/loyalty',
-    '/cart',
+    Routes.search,
+    Routes.loyalty,
+    Routes.cart,
   };
+
+  void _leaveWebViewFor(String route) {
+    if (!mounted) return;
+    navigateFromCmsWebView(Navigator.of(context), route);
+  }
+}
+
+/// Leaves CMS web content for an allowlisted native route.
+///
+/// Kept outside the widget so its stack semantics can be tested without
+/// constructing a platform WebView.
+void navigateFromCmsWebView(NavigatorState navigator, String route) {
+  if (route == Routes.search) {
+    // Search is the app's existing root route. Unwind the checkout,
+    // confirmation and CMS WebView instead of placing a second SearchScreen
+    // above them. Back can no longer reveal the itinerary WebView.
+    navigator.popUntil(
+      (Route<dynamic> candidate) =>
+          candidate.settings.name == Routes.search || candidate.isFirst,
+    );
+    return;
+  }
+
+  // Other allowlisted native destinations take the WebView's place. This
+  // preserves the screen that opened the CMS page while ensuring Back never
+  // returns to stale web content.
+  navigator.pushReplacementNamed(route);
 }
