@@ -53,10 +53,8 @@ class LogRecord {
 }
 
 class AppLogger {
-  AppLogger({
-    this.minimumLevel = LogLevel.debug,
-    List<LogSink>? sinks,
-  }) : _sinks = sinks ?? <LogSink>[_developerSink];
+  AppLogger({this.minimumLevel = LogLevel.debug, List<LogSink>? sinks})
+    : _sinks = sinks ?? <LogSink>[_developerSink];
 
   final LogLevel minimumLevel;
   final List<LogSink> _sinks;
