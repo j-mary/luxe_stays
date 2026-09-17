@@ -53,10 +53,12 @@ class LogRecord {
 }
 
 class AppLogger {
-  AppLogger({this._minimumLevel = LogLevel.debug, List<LogSink>? sinks})
-    : _sinks = sinks ?? <LogSink>[_developerSink];
+  AppLogger({
+    this.minimumLevel = LogLevel.debug,
+    List<LogSink>? sinks,
+  }) : _sinks = sinks ?? <LogSink>[_developerSink];
 
-  final LogLevel _minimumLevel;
+  final LogLevel minimumLevel;
   final List<LogSink> _sinks;
 
   /// Keys whose values must never leave the device in plain text.
@@ -118,7 +120,7 @@ class AppLogger {
     Object? error,
     StackTrace? stackTrace,
   ) {
-    if (level.index < _minimumLevel.index) {
+    if (level.index < minimumLevel.index) {
       return;
     }
     final LogRecord record = LogRecord(
