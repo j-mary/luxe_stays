@@ -7,7 +7,7 @@ import '../../domain/search.dart';
 import 'synxis_models.dart';
 
 /// Transport for Sabre **SynXis** - the central reservation system that owns
-/// inventory, rates and reservations for the 400+ properties in the programme.
+/// inventory, rates and reservations for the properties in the programme.
 ///
 /// Scope of this class: build the request, hand the raw JSON to a mapper, return
 /// a [Result]. No domain logic, no caching, no UI concerns. That separation is

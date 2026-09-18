@@ -3,9 +3,11 @@
 [![CI](https://github.com/j-mary/luxe_stays/actions/workflows/ci.yml/badge.svg)](https://github.com/j-mary/luxe_stays/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/j-mary/luxe_stays/branch/main/graph/badge.svg)](https://codecov.io/gh/j-mary/luxe_stays)
 
-A working Flutter proof-of-concept for a **luxury-hotel OTA**: 400+ properties,
-flexible search, a multi-property cart, a booking and payment flow, and a
-loyalty programme that stacks member rates with an internal points currency.
+A working Flutter proof-of-concept for a **luxury-hotel OTA**: seven synthetic
+properties across five destinations, flexible search, a multi-property cart, a
+booking and payment flow, and a loyalty programme that stacks member rates with
+an internal points currency. Its integration boundaries are designed for a
+larger production portfolio, but that scale is not simulated here.
 
 It is built as a **hybrid app** — native where the product competes, WebView
 where the vendor owns the flow — and it integrates four external systems:
