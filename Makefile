@@ -1,6 +1,6 @@
 # LuxeStays - developer entry points.
 .PHONY: help bootstrap patch-platforms mock run run-emulator run-ios run-lan \
-        adb-reverse ip analyze format test coverage integration \
+        build-apk build-emulator build-android-usb build-ios-simulator adb-reverse ip analyze format test coverage integration \
         integration-emulator integration-ios ci clean
 
 FLUTTER ?= fvm flutter
@@ -74,6 +74,21 @@ run-ios: ## Run on the first booted iOS simulator
 
 run-lan: HOST = $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
 run-lan: run ## Run on a physical device over Wi-Fi (uses this Mac's LAN IP)
+
+build-apk: ## Build a debug APK using HOST (localhost by default)
+	@echo "→ APK will call $(BASE)"
+	$(FLUTTER) build apk --debug $(DEFINES)
+
+build-emulator: HOST = 10.0.2.2
+build-emulator: build-apk ## Build a debug APK for an Android emulator
+
+build-android-usb: HOST = localhost
+build-android-usb: build-apk ## Build a debug APK for a USB device (requires adb-reverse)
+
+build-ios-simulator: HOST = localhost
+build-ios-simulator: ## Build a debug iOS simulator app against local mocks
+	@echo "→ iOS simulator app will call $(BASE)"
+	$(FLUTTER) build ios --simulator --debug $(DEFINES)
 
 analyze: ## Static analysis
 	$(FLUTTER) analyze

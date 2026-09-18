@@ -1,5 +1,8 @@
 # LuxeStays
 
+[![CI](https://github.com/j-mary/luxe_stays/actions/workflows/ci.yml/badge.svg)](https://github.com/j-mary/luxe_stays/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/j-mary/luxe_stays/branch/main/graph/badge.svg)](https://codecov.io/gh/j-mary/luxe_stays)
+
 A working Flutter proof-of-concept for a **luxury-hotel OTA**: 400+ properties,
 flexible search, a multi-property cart, a booking and payment flow, and a
 loyalty programme that stacks member rates with an internal points currency.
@@ -62,6 +65,37 @@ redemption appear.
 
 If FVM is unavailable, pass matching Flutter and Dart commands to Make, for
 example `make bootstrap FLUTTER=flutter DART=dart`.
+
+### Build apps that use the mock back end
+
+Keep `make mock` running while using these debug builds:
+
+```bash
+# APK configured for an Android emulator (host alias 10.0.2.2)
+make build-emulator
+
+# APK for a physical Android device connected over USB
+make adb-reverse
+make build-android-usb
+
+# .app configured for a booted iOS simulator (localhost)
+make build-ios-simulator
+
+# APK for a physical device on the same Wi-Fi
+make build-apk HOST=192.168.1.25
+```
+
+CI publishes two clearly named Android artifacts:
+
+- `luxestays-android-emulator.apk` uses `10.0.2.2` and works only in an Android
+  emulator whose host computer is running `make mock`.
+- `luxestays-android-usb.apk` uses `localhost`; before opening it on a physical
+  USB-connected device, run `make mock` and `make adb-reverse` on the computer.
+
+The iOS artifact uses `localhost` and connects from the simulator to
+`make mock` on the same Mac. A physical device over Wi-Fi needs an APK built
+with a reachable LAN address, as shown above. These local HTTP settings are
+limited to debug builds; production endpoints should use HTTPS.
 
 ---
 

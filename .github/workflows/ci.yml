@@ -14,6 +14,9 @@ jobs:
   analyze:
     name: Analyze & test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -40,6 +43,15 @@ jobs:
         with:
           name: coverage
           path: coverage/lcov.info
+
+      - name: Publish coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          files: coverage/lcov.info
+          flags: flutter
+          name: luxe-stays
+          fail_ci_if_error: true
 
   contract:
     name: Local mock contract check
@@ -84,15 +96,20 @@ jobs:
       - run: flutter pub get
 
       - name: Build Android demo APK
-        run: flutter build apk --debug
+        run: |
+          mkdir -p build/demo-apks
+          make build-emulator FLUTTER=flutter DART=dart
+          cp build/app/outputs/flutter-apk/app-debug.apk build/demo-apks/luxestays-android-emulator.apk
+          make build-android-usb FLUTTER=flutter DART=dart
+          cp build/app/outputs/flutter-apk/app-debug.apk build/demo-apks/luxestays-android-usb.apk
 
       - name: Build iOS simulator demo
-        run: flutter build ios --simulator --debug
+        run: make build-ios-simulator FLUTTER=flutter DART=dart
 
       - uses: actions/upload-artifact@v4
         with:
           name: demo-builds
           path: |
-            build/app/outputs/flutter-apk/*.apk
+            build/demo-apks/*.apk
             build/ios/iphonesimulator/*.app
           if-no-files-found: error

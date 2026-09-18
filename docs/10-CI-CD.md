@@ -24,6 +24,10 @@ produce something worth keeping.
 - run: dart format --output=none --set-exit-if-changed lib test integration_test tool
 - run: flutter analyze --fatal-warnings
 - run: flutter test --coverage --reporter expanded
+- uses: codecov/codecov-action@v5
+  with:
+    use_oidc: true
+    files: coverage/lcov.info
 ```
 
 `--fatal-warnings` rather than `--fatal-infos`, deliberately. The strictness that
@@ -33,6 +37,11 @@ propagating into a widget, the single most common source of "works on my device"
 crashes in an app that talks to five APIs. Making *infos* fatal would also fail
 the build every time a Flutter minor release deprecates a constructor argument,
 which trains people to ignore the job.
+
+The LCOV report is retained as a workflow artifact and published to Codecov.
+The job grants `id-token: write` and uses GitHub OIDC, so it does not require a
+long-lived `CODECOV_TOKEN`. The repository must be enabled in Codecov before the
+first report and badge appear.
 
 ### Job 2 — contract
 
@@ -46,10 +55,13 @@ every PR against the mocks. Vendor changes do not respect your sprint boundary.
 
 ### Job 3 — build
 
-Runs only on `main` and on `v*` tags. Decodes signing material from secrets
-into `RUNNER_TEMP`, and builds an AAB and an IPA with the production
-`--dart-define` values. The host projects are committed, so there is nothing to
-generate first.
+Runs only on `main` and on `v*` tags. This proof-of-concept workflow publishes
+unsigned debug artifacts for testing against the mock backend. The
+emulator artifact uses `10.0.2.2`; the USB-device artifact uses `localhost` and
+requires `adb reverse tcp:8080 tcp:8080` while the mock server is running. The
+iOS `.app` is a simulator build using `localhost`. None of these artifacts
+contains or starts the mock server itself. The host projects are committed, so
+there is nothing to generate first.
 
 ## Configuration and flavours
 
@@ -112,8 +124,9 @@ costs a few dozen guests, not a weekend of revenue.
 
 ## Observability in the pipeline
 
-* Coverage uploaded as an artefact; a threshold gate is easy to add and easy to
-  game, so it is worth setting per-directory rather than globally.
+* Coverage is uploaded as an artefact and published to Codecov; a threshold
+  gate is easy to add and easy to game, so it is worth setting per-directory
+  rather than globally.
 * Symbol files (`--split-debug-info`, `--obfuscate`) uploaded to the crash
   reporter as part of `build`, or stack traces from production are unreadable.
 * Build-size tracking (`flutter build apk --analyze-size`) is worth a job of its
