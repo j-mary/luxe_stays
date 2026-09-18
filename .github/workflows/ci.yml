@@ -49,9 +49,14 @@ jobs:
         with:
           use_oidc: true
           files: coverage/lcov.info
+          disable_search: true
+          plugins: noop
           flags: flutter
           name: luxe-stays
-          fail_ci_if_error: true
+          # Keep tests and downloadable LCOV useful before the repository has
+          # been enabled in Codecov. Uploads begin working automatically after
+          # the Codecov GitHub App is granted access to this repository.
+          fail_ci_if_error: false
 
   contract:
     name: Local mock contract check

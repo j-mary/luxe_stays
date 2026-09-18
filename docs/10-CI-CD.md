@@ -28,6 +28,9 @@ produce something worth keeping.
   with:
     use_oidc: true
     files: coverage/lcov.info
+    disable_search: true
+    plugins: noop
+    fail_ci_if_error: false
 ```
 
 `--fatal-warnings` rather than `--fatal-infos`, deliberately. The strictness that
@@ -38,10 +41,13 @@ crashes in an app that talks to five APIs. Making *infos* fatal would also fail
 the build every time a Flutter minor release deprecates a constructor argument,
 which trains people to ignore the job.
 
-The LCOV report is retained as a workflow artifact and published to Codecov.
-The job grants `id-token: write` and uses GitHub OIDC, so it does not require a
-long-lived `CODECOV_TOKEN`. The repository must be enabled in Codecov before the
-first report and badge appear.
+The LCOV report is always retained as a workflow artifact, then the workflow
+attempts to publish it to Codecov. The job grants `id-token: write` and uses
+GitHub OIDC, so it does not require a long-lived `CODECOV_TOKEN`.
+`fail_ci_if_error: false` keeps a missing Codecov registration from masking a
+successful test run. Enable `j-mary/luxe_stays` in the Codecov GitHub App and
+select **Setup repo** in Codecov before the first hosted report and badge appear;
+after that, uploads work without another workflow change.
 
 ### Job 2 — contract
 
