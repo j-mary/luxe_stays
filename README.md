@@ -183,6 +183,12 @@ docs/             the documentation table above
 | **Corners are nearly square** | 2px on controls and panels, none on imagery. Rounded elevated cards read as software; a hairline rule and a sharp edge read as print. |
 | **Emphasis comes from a rule, not a fill** | Section breaks are a letterspaced overline plus a rule to the margin ([`SectionHeading`](lib/shared/widgets/section_heading.dart)); grouping is a hairline border ([`AppPanel`](lib/shared/widgets/app_panel.dart)); the one saturated surface in the app is the ink plate behind the membership panel. |
 
+The framed **LS** monogram is used in the app masthead and the Android and iOS
+launcher icons. The full-size launcher artwork is
+[`assets/branding/luxestays-app-icon.png`](assets/branding/luxestays-app-icon.png),
+and [`LuxeStaysLogo`](lib/shared/widgets/brand_logo.dart) composes it with the
+wordmark in application chrome.
+
 Two consequences worth knowing before editing it.
 
 `ColorScheme.fromSeed` tints *every* container from the seed hue, so all the

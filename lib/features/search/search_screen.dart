@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/router.dart';
-import '../../app/theme.dart';
 import '../../core/error/failure.dart';
 import '../../data/hotel_repository.dart';
 import '../../domain/cart.dart';
@@ -10,6 +9,7 @@ import '../../domain/rate.dart';
 import '../../domain/search.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_states.dart';
+import '../../shared/widgets/brand_logo.dart';
 import '../../shared/widgets/section_heading.dart';
 import '../account/session_controller.dart';
 import '../cart/cart_controller.dart';
@@ -53,13 +53,9 @@ class SearchScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          // Set as a letterspaced serif wordmark rather than as an app-bar
-          // title: the brand is the only thing in the chrome, so it should
-          // read as a masthead.
-          'LUXESTAYS',
-          style: AppTheme.serif(size: 17, letterSpacing: 4.2),
-        ),
+        // The monogram uses the same artwork as the launcher icon while the
+        // letterspaced serif wordmark preserves the editorial masthead.
+        title: const LuxeStaysLogo(),
         // A hairline instead of an elevation shadow. The masthead is separated
         // from the page by a rule, the same device used for every other
         // section break in the app.
