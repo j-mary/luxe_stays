@@ -64,10 +64,13 @@ macOS firewall prompt. It has to be re-run after a device reconnect.
 
 ### If you are on Wi-Fi and it still fails
 
-1. Confirm the server is actually up and bound to all interfaces:
-   `curl http://localhost:8080/health` on the Mac, then
-   `curl http://<your-lan-ip>:8080/health` **from the Mac** — the second is the
-   one that matters, because it proves the server is reachable off-loopback.
+Build with `make build-lan`; it detects the Mac's current address rather than
+relying on an example IP that may belong to a different subnet. Rebuild whenever
+that address changes, because the URL is compiled into the APK.
+
+1. Confirm the server is actually up and reachable off-loopback with
+   `make check-lan`. Then open the same `/health` URL printed by `make mock` in
+   the phone's browser. This separates network/firewall trouble from app code.
 2. macOS firewall: System Settings → Network → Firewall may be blocking
    incoming connections to the `dart` process. Allow it, or use `adb reverse`.
 3. Phone and Mac must be on the same network — guest Wi-Fi and "client

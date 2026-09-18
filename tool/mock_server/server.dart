@@ -113,6 +113,18 @@ Future<void> main(List<String> args) async {
   stdout.writeln(
     '  open http://localhost:${server.port}/ for the endpoint map',
   );
+  final List<NetworkInterface> interfaces = await NetworkInterface.list(
+    type: InternetAddressType.IPv4,
+    includeLoopback: false,
+  );
+  for (final NetworkInterface interface in interfaces) {
+    for (final InternetAddress address in interface.addresses) {
+      stdout.writeln(
+        '  device URL (${interface.name}): '
+        'http://${address.address}:${server.port}/',
+      );
+    }
+  }
 }
 
 int? _intArg(List<String> args, String name) {

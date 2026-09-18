@@ -83,8 +83,8 @@ make build-android-usb
 # .app configured for a booted iOS simulator (localhost)
 make build-ios-simulator
 
-# APK for a physical device on the same Wi-Fi
-make build-apk HOST=192.168.1.25
+# APK for a physical device on the same Wi-Fi; detects this Mac's address
+make build-lan
 ```
 
 CI publishes two clearly named Android artifacts:
@@ -96,8 +96,11 @@ CI publishes two clearly named Android artifacts:
 
 The iOS artifact uses `localhost` and connects from the simulator to
 `make mock` on the same Mac. A physical device over Wi-Fi needs an APK built
-with a reachable LAN address, as shown above. These local HTTP settings are
-limited to debug builds; production endpoints should use HTTPS.
+with the Mac's current LAN address, as shown above. Run `make check-lan` while
+the server is running, then open the printed `/health` URL in the phone's
+browser before installing the APK. If the browser cannot load it, check the
+macOS firewall and whether the Wi-Fi network isolates devices. These local HTTP
+settings are limited to debug builds; production endpoints should use HTTPS.
 
 ---
 

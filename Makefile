@@ -1,6 +1,6 @@
 # LuxeStays - developer entry points.
 .PHONY: help bootstrap patch-platforms mock run run-emulator run-ios run-lan \
-        build-apk build-emulator build-android-usb build-ios-simulator adb-reverse ip analyze format test coverage integration \
+        build-apk build-emulator build-android-usb build-lan build-ios-simulator adb-reverse ip check-lan analyze format test coverage integration \
         integration-emulator integration-ios ci clean
 
 FLUTTER ?= fvm flutter
@@ -8,6 +8,7 @@ DART ?= fvm dart
 FLAVOR ?= dev
 PORT   ?= 8080
 DEVICE ?=
+LAN_HOST ?= $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
 
 # Default device IDs for the platform-specific targets. Override either value
 # at the command line when more than one matching device is available.
@@ -55,8 +56,12 @@ adb-reverse: ## Android on USB: tunnel the device's localhost:8080 to this Mac
 	@echo 'Device localhost now points at this machine; plain `make run` will work.'
 
 ip: ## Print this Mac's LAN IP (for a physical device on Wi-Fi)
-	@ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || \
-		echo "could not determine a LAN IP - check System Settings > Network"
+	@if [ -n "$(LAN_HOST)" ]; then echo "$(LAN_HOST)"; else \
+		echo "could not determine a LAN IP - check System Settings > Network"; exit 1; fi
+
+check-lan: ## Verify the running mock server through this Mac's LAN address
+	@if [ -z "$(LAN_HOST)" ]; then echo 'Could not determine a LAN IP.'; exit 1; fi
+	curl --fail --show-error http://$(LAN_HOST):$(PORT)/health
 
 run: ## Run against mocks; set DEVICE=<id> to skip Flutter's device prompt
 	@echo "→ app will call $(BASE)"
@@ -72,8 +77,9 @@ run-ios: ## Run on the first booted iOS simulator
 	@if [ -z "$(DEVICE)" ]; then echo 'No booted iOS simulator found.'; exit 1; fi
 	@$(MAKE) run HOST="$(HOST)" DEVICE="$(DEVICE)" FLUTTER="$(FLUTTER)" DART="$(DART)"
 
-run-lan: HOST = $(shell ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
-run-lan: run ## Run on a physical device over Wi-Fi (uses this Mac's LAN IP)
+run-lan: ## Run on a physical device over Wi-Fi (uses this Mac's LAN IP)
+	@if [ -z "$(LAN_HOST)" ]; then echo 'Could not determine a LAN IP.'; exit 1; fi
+	@$(MAKE) run HOST="$(LAN_HOST)" DEVICE="$(DEVICE)" FLUTTER="$(FLUTTER)" DART="$(DART)"
 
 build-apk: ## Build a debug APK using HOST (localhost by default)
 	@echo "→ APK will call $(BASE)"
@@ -84,6 +90,10 @@ build-emulator: build-apk ## Build a debug APK for an Android emulator
 
 build-android-usb: HOST = localhost
 build-android-usb: build-apk ## Build a debug APK for a USB device (requires adb-reverse)
+
+build-lan: ## Build a debug APK for this Mac's current Wi-Fi address
+	@if [ -z "$(LAN_HOST)" ]; then echo 'Could not determine a LAN IP.'; exit 1; fi
+	@$(MAKE) build-apk HOST="$(LAN_HOST)" FLUTTER="$(FLUTTER)" DART="$(DART)"
 
 build-ios-simulator: HOST = localhost
 build-ios-simulator: ## Build a debug iOS simulator app against local mocks
